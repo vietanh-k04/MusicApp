@@ -1,0 +1,34 @@
+package com.example.musicapp.di
+
+import android.content.Context
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.exoplayer.ExoPlayer
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object ServiceModule {
+
+    @Provides
+    @Singleton
+    fun provideAudioAttributes(): AudioAttributes = AudioAttributes.Builder()
+        .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC) // Loại nội dung: Nhạc
+        .setUsage(C.USAGE_MEDIA) // Mục đích: Giải trí
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideExoPlayer(
+        @ApplicationContext context: Context,
+        audioAttributes: AudioAttributes
+    ): ExoPlayer = ExoPlayer.Builder(context)
+        .setAudioAttributes(audioAttributes, true) // Tự động nhỏ nhạc khi có thông báo
+        .setHandleAudioBecomingNoisy(true) // Tự dừng khi rút tai nghe
+        .build()
+}

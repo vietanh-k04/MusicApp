@@ -82,5 +82,6 @@ dependencies {
     // 5. Image Loading (Coil) - Để load ảnh bìa album
     implementation(libs.coil.compose)
 
-
+    // Coroutines: Để chạy tác vụ mạng không làm đơ giao diện (nếu chưa có)
+    implementation(libs.kotlinx.coroutines.android)
 }
