@@ -4,4 +4,6 @@ import com.example.musicapp.domain.model.Song
 
 interface MusicRepository {
     suspend fun getLocalSongs(): List<Song>
+
+    suspend fun searchSongs(query: String): List<Song>
 }

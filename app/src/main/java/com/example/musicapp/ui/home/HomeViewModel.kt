@@ -3,10 +3,12 @@ package com.example.musicapp.ui.home
 import android.content.ComponentName
 import android.content.Context
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.example.musicapp.domain.model.Song
@@ -20,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import androidx.core.net.toUri
 
 sealed interface HomeUiState {
     object Loading : HomeUiState
@@ -32,10 +33,17 @@ sealed interface HomeUiState {
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: MusicRepository,
-    @ApplicationContext private val context: Context) : ViewModel() {
+    @ApplicationContext private val context: Context
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    private val _currentPlayingSong = MutableStateFlow<Song?>(null)
+    val currentPlayingSong = _currentPlayingSong.asStateFlow()
+
+    private val _isPlaying = MutableStateFlow(false)
+    val isPlaying = _isPlaying.asStateFlow()
 
     // Công cụ điều khiển nhạc (Remote Control)
     private var mediaController: MediaController? = null
@@ -49,6 +57,11 @@ class HomeViewModel @Inject constructor(
             try {
                 mediaController = controllerFuture.get()
                 Log.d("MusicApp", "Kết nối Service thành công!")
+
+                // --- SỬA 1: GỌI HÀM LẮNG NGHE Ở ĐÂY ---
+                setupPlayerListener()
+                // -------------------------------------
+
             } catch (e: Exception) {
                 Log.e("MusicApp", "Lỗi kết nối Service: ${e.message}")
             }
@@ -67,15 +80,21 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // Hàm gọi khi bấm vào 1 bài hát
     fun playMusic(song: Song) {
-        val controller = mediaController
-        if (controller == null) {
-            Log.e("MusicApp", "Controller chưa sẵn sàng, thử lại sau!")
+        val controller = mediaController ?: return
+
+        // --- SỬA 2: CẬP NHẬT UI NGAY LẬP TỨC ---
+        _currentPlayingSong.value = song
+        _isPlaying.value = true
+        // ---------------------------------------
+
+        // Nếu đang chọn đúng bài đang phát thì chỉ toggle Play/Pause
+        if (controller.currentMediaItem?.mediaId == song.id.toString()) {
+            if (controller.isPlaying) controller.pause() else controller.play()
             return
         }
 
-        // Tạo gói dữ liệu bài hát (MediaItem)
+        // Nếu bài mới thì phát mới
         val mediaItem = MediaItem.Builder()
             .setUri(song.contentUri)
             .setMediaId(song.id.toString())
@@ -83,15 +102,65 @@ class HomeViewModel @Inject constructor(
                 MediaMetadata.Builder()
                     .setTitle(song.title)
                     .setArtist(song.artist)
-                    .setArtworkUri(song.albumArtUri?.toUri())
+                    .setArtworkUri((song.albumArtUri ?: "").toUri())
                     .build()
             )
             .build()
 
-        // Gửi lệnh xuống Service
         controller.setMediaItem(mediaItem)
         controller.prepare()
         controller.play()
+    }
+
+    fun searchOnline(query: String) {
+        viewModelScope.launch {
+            _uiState.value = HomeUiState.Loading // Hiện loading
+            try {
+                // Gọi repository
+                val songs = repository.searchSongs(query)
+                if (songs.isEmpty()) {
+                    _uiState.value = HomeUiState.Error
+                } else {
+                    _uiState.value = HomeUiState.Success(songs)
+                }
+            } catch (e: Exception) {
+                _uiState.value = HomeUiState.Error
+            }
+        }
+    }
+
+    private fun setupPlayerListener() {
+        val controller = mediaController ?: return
+
+        // Cập nhật trạng thái ban đầu
+        _isPlaying.value = controller.isPlaying
+        syncCurrentSong(controller)
+
+        // Đăng ký lắng nghe sự kiện
+        controller.addListener(object : Player.Listener {
+            // Khi trạng thái Play/Pause thay đổi
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                _isPlaying.value = isPlaying
+            }
+
+            // Khi bài hát thay đổi (Next/Prev hoặc hết bài)
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                syncCurrentSong(controller)
+            }
+        })
+    }
+
+    private fun syncCurrentSong(controller: MediaController) {
+        val item = controller.currentMediaItem
+        if (item != null) {
+            _currentPlayingSong.value = Song(
+                id = item.mediaId.toLongOrNull(),
+                title = item.mediaMetadata.title.toString(),
+                artist = item.mediaMetadata.artist.toString(),
+                contentUri = item.requestMetadata.mediaUri.toString(),
+                albumArtUri = item.mediaMetadata.artworkUri.toString()
+            )
+        }
     }
 
     fun onPermissionDenied() {
@@ -102,5 +171,10 @@ class HomeViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         mediaController?.release()
+    }
+
+    fun toggleMusic() {
+        val controller = mediaController ?: return
+        if (controller.isPlaying) controller.pause() else controller.play()
     }
 }
