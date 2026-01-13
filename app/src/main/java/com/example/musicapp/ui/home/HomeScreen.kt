@@ -4,7 +4,6 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.musicapp.ui.components.MiniPlayer
 import com.example.musicapp.ui.components.SongItem
 
@@ -40,6 +38,9 @@ fun HomeScreen(viewModel: HomeViewModel, onMiniPlayerClick: () -> Unit) {
 
     val currentSong by viewModel.currentPlayingSong.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
+
+    val currentPos by viewModel.currentPosition.collectAsState()
+    val duration by viewModel.duration.collectAsState()
 
     var searchQuery by remember { mutableStateOf("Son Tung MTP") }
 
@@ -120,10 +121,14 @@ fun HomeScreen(viewModel: HomeViewModel, onMiniPlayerClick: () -> Unit) {
             }
         }
         if (currentSong != null) {
+            val progress = if (duration > 0) currentPos.toFloat() / duration.toFloat() else 0f
             MiniPlayer(
                 song = currentSong!!,
                 isPlaying = isPlaying,
+                progress = progress,
                 onTogglePlay = { viewModel.toggleMusic() },
+                onNext = { viewModel.skipToNext() },
+                onPrev = { viewModel.skipToPrevious() },
                 onClick = { onMiniPlayerClick() }
             )
         }

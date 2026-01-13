@@ -17,6 +17,7 @@ import com.example.musicapp.service.MusicService
 import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,37 +37,57 @@ class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
+    // --- CÁC BIẾN STATE (TRẠNG THÁI UI) ---
+
+    // 1. Trạng thái tải dữ liệu (Loading/List Nhạc/Lỗi)
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    // 2. Bài hát đang phát
     private val _currentPlayingSong = MutableStateFlow<Song?>(null)
     val currentPlayingSong = _currentPlayingSong.asStateFlow()
 
+    // 3. Trạng thái Play/Pause
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying = _isPlaying.asStateFlow()
 
-    // Công cụ điều khiển nhạc (Remote Control)
+    // 4. Tổng thời gian bài hát (Duration)
+    private val _duration = MutableStateFlow(0L)
+    val duration = _duration.asStateFlow()
+
+    // 5. Vị trí hiện tại (Current Position - cho thanh Seekbar)
+    private val _currentPosition = MutableStateFlow(0L)
+    val currentPosition = _currentPosition.asStateFlow()
+
+    // 6. Trạng thái Shuffle (Trộn bài)
+    private val _shuffleMode = MutableStateFlow(false)
+    val shuffleMode = _shuffleMode.asStateFlow()
+
+    // 7. Trạng thái Repeat (Lặp lại)
+    private val _repeatMode = MutableStateFlow(Player.REPEAT_MODE_OFF)
+    val repeatMode = _repeatMode.asStateFlow()
+
+    // Công cụ điều khiển nhạc (Giao tiếp với Service)
     private var mediaController: MediaController? = null
 
     init {
-        // 1. Khởi động kết nối tới MusicService
+        // Khởi động kết nối tới MusicService
         val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
         val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
 
         controllerFuture.addListener({
             try {
                 mediaController = controllerFuture.get()
-                Log.d("MusicApp", "Kết nối Service thành công!")
-
-                // --- SỬA 1: GỌI HÀM LẮNG NGHE Ở ĐÂY ---
-                setupPlayerListener()
-                // -------------------------------------
-
+                // Sau khi kết nối thành công:
+                setupPlayerListener() // 1. Lắng nghe sự kiện từ Service
+                updateProgress()      // 2. Bắt đầu vòng lặp cập nhật Seekbar
             } catch (e: Exception) {
                 Log.e("MusicApp", "Lỗi kết nối Service: ${e.message}")
             }
         }, MoreExecutors.directExecutor())
     }
+
+    // --- CÁC HÀM XỬ LÝ DỮ LIỆU ---
 
     fun loadSongs() {
         viewModelScope.launch {
@@ -80,72 +101,150 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun playMusic(song: Song) {
-        val controller = mediaController ?: return
-
-        // --- SỬA 2: CẬP NHẬT UI NGAY LẬP TỨC ---
-        _currentPlayingSong.value = song
-        _isPlaying.value = true
-        // ---------------------------------------
-
-        // Nếu đang chọn đúng bài đang phát thì chỉ toggle Play/Pause
-        if (controller.currentMediaItem?.mediaId == song.id.toString()) {
-            if (controller.isPlaying) controller.pause() else controller.play()
-            return
-        }
-
-        // Nếu bài mới thì phát mới
-        val mediaItem = MediaItem.Builder()
-            .setUri(song.contentUri)
-            .setMediaId(song.id.toString())
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(song.title)
-                    .setArtist(song.artist)
-                    .setArtworkUri((song.albumArtUri ?: "").toUri())
-                    .build()
-            )
-            .build()
-
-        controller.setMediaItem(mediaItem)
-        controller.prepare()
-        controller.play()
-    }
-
     fun searchOnline(query: String) {
         viewModelScope.launch {
-            _uiState.value = HomeUiState.Loading // Hiện loading
+            _uiState.value = HomeUiState.Loading
             try {
-                // Gọi repository
                 val songs = repository.searchSongs(query)
                 if (songs.isEmpty()) {
                     _uiState.value = HomeUiState.Error
                 } else {
                     _uiState.value = HomeUiState.Success(songs)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _uiState.value = HomeUiState.Error
             }
         }
     }
 
+    fun onPermissionDenied() {
+        _uiState.value = HomeUiState.PermissionRequired
+    }
+
+    // --- CÁC HÀM ĐIỀU KHIỂN NHẠC (CORE LOGIC) ---
+
+    fun playMusic(song: Song) {
+        val controller = mediaController ?: return
+
+        // 1. Lấy danh sách nhạc hiện tại để nạp vào Playlist (Hỗ trợ Next/Prev)
+        val currentList = (uiState.value as? HomeUiState.Success)?.songs ?: return
+
+        // 2. Tìm vị trí bài hát được bấm
+        val index = currentList.indexOfFirst { it.id == song.id }
+        if (index == -1) return
+
+        // Cập nhật UI ngay lập tức (cho mượt)
+        _currentPlayingSong.value = song
+        _isPlaying.value = true
+
+        // 3. Nếu đang bấm đúng bài đang phát -> Chỉ toggle Play/Pause
+        if (controller.currentMediaItem?.mediaId == song.id.toString()) {
+            if (controller.isPlaying) controller.pause() else controller.play()
+            return
+        }
+
+        // 4. Biến đổi List<Song> -> List<MediaItem> để gửi cho ExoPlayer
+        val mediaItems = currentList.map { item ->
+            MediaItem.Builder()
+                .setUri(item.contentUri)
+                .setMediaId(item.id.toString())
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(item.title)
+                        .setArtist(item.artist)
+                        .setArtworkUri((item.albumArtUri ?: "").toUri())
+                        .build()
+                )
+                .build()
+        }
+
+        // 5. Nạp danh sách và nhảy tới đúng bài
+        controller.setMediaItems(mediaItems)
+        controller.seekTo(index, 0L) // Nhảy tới bài thứ 'index'
+        controller.prepare()
+        controller.play()
+    }
+
+    fun toggleMusic() {
+        val controller = mediaController ?: return
+        if (controller.isPlaying) controller.pause() else controller.play()
+    }
+
+    fun skipToNext() {
+        val controller = mediaController ?: return
+        if (controller.hasNextMediaItem()) {
+            controller.seekToNextMediaItem()
+        }
+    }
+
+    fun skipToPrevious() {
+        val controller = mediaController ?: return
+        // Nếu đã chạy quá 3 giây -> Replay lại từ đầu
+        if (controller.currentPosition > 3000) {
+            controller.seekTo(0)
+        } else {
+            // Nếu chưa quá 3 giây -> Lùi về bài trước
+            if (controller.hasPreviousMediaItem()) {
+                controller.seekToPreviousMediaItem()
+            } else {
+                controller.seekTo(0)
+            }
+        }
+    }
+
+    fun seekTo(position: Long) {
+        mediaController?.seekTo(position)
+        _currentPosition.value = position // Cập nhật UI ngay
+    }
+
+    fun toggleShuffle() {
+        val controller = mediaController ?: return
+        controller.shuffleModeEnabled = !controller.shuffleModeEnabled
+    }
+
+    fun toggleRepeat() {
+        val controller = mediaController ?: return
+        val newMode = when (controller.repeatMode) {
+            Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
+            Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
+            else -> Player.REPEAT_MODE_OFF
+        }
+        controller.repeatMode = newMode
+    }
+
+    // --- CÁC HÀM ĐỒNG BỘ UI & SERVICE ---
+
     private fun setupPlayerListener() {
         val controller = mediaController ?: return
 
-        // Cập nhật trạng thái ban đầu
+        // Đồng bộ trạng thái ban đầu
         _isPlaying.value = controller.isPlaying
+        _shuffleMode.value = controller.shuffleModeEnabled
+        _repeatMode.value = controller.repeatMode
         syncCurrentSong(controller)
 
-        // Đăng ký lắng nghe sự kiện
         controller.addListener(object : Player.Listener {
-            // Khi trạng thái Play/Pause thay đổi
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _isPlaying.value = isPlaying
             }
 
-            // Khi bài hát thay đổi (Next/Prev hoặc hết bài)
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 syncCurrentSong(controller)
+            }
+
+            // Quan trọng: Lấy Duration chuẩn khi Player load xong
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    _duration.value = controller.duration.coerceAtLeast(0L)
+                }
+            }
+
+            override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+                _shuffleMode.value = shuffleModeEnabled
+            }
+
+            override fun onRepeatModeChanged(repeatMode: Int) {
+                _repeatMode.value = repeatMode
             }
         })
     }
@@ -160,21 +259,33 @@ class HomeViewModel @Inject constructor(
                 contentUri = item.requestMetadata.mediaUri.toString(),
                 albumArtUri = item.mediaMetadata.artworkUri.toString()
             )
+            // Cập nhật duration dự phòng
+            if (controller.duration > 0) {
+                _duration.value = controller.duration
+            }
         }
     }
 
-    fun onPermissionDenied() {
-        _uiState.value = HomeUiState.PermissionRequired
+    private fun updateProgress() {
+        viewModelScope.launch {
+            while (true) {
+                val controller = mediaController
+                if (controller != null && _isPlaying.value) {
+                    val current = controller.currentPosition
+                    _currentPosition.value = current
+
+                    // Logic dự phòng: Cập nhật duration nếu chưa có
+                    if (_duration.value <= 0 && controller.duration > 0) {
+                        _duration.value = controller.duration
+                    }
+                }
+                delay(1000) // Cập nhật mỗi 1 giây
+            }
+        }
     }
 
-    // Ngắt kết nối khi thoát màn hình để tránh rò rỉ bộ nhớ
     override fun onCleared() {
         super.onCleared()
         mediaController?.release()
-    }
-
-    fun toggleMusic() {
-        val controller = mediaController ?: return
-        if (controller.isPlaying) controller.pause() else controller.play()
     }
 }
