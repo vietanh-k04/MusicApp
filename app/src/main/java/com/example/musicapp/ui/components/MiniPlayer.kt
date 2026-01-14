@@ -120,13 +120,13 @@ fun MiniPlayer(
 
         // 4. THANH TIẾN TRÌNH (Sát đáy)
         LinearProgressIndicator(
-            progress = progress,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-            strokeCap = StrokeCap.Round
+        progress = { progress },
+        modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp),
+        color = MaterialTheme.colorScheme.primary,
+        trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+        strokeCap = StrokeCap.Round,
         )
     }
 }

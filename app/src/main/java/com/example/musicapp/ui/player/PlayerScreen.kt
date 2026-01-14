@@ -31,11 +31,11 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.musicapp.ui.home.HomeViewModel
+import com.example.musicapp.ui.viewmodel.SharedViewModel
 import com.example.musicapp.utils.formatDuration
 
 @Composable
-fun PlayerScreen(onBack: () -> Unit, viewModel: HomeViewModel) {
+fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
     // 1. Lấy các State từ ViewModel
     val currentSong by viewModel.currentPlayingSong.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
