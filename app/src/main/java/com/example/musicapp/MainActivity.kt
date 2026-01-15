@@ -1,10 +1,12 @@
 package com.example.musicapp
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,23 +18,27 @@ import com.example.musicapp.ui.viewmodel.SharedViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MusicAppTheme {
-                val rootNavController = rememberNavController()
+            // 1. Khởi tạo ViewModel sớm để lấy config Theme
+            val sharedViewModel: SharedViewModel = hiltViewModel()
 
-                val sharedViewModel: SharedViewModel = hiltViewModel()
+            // 2. Lắng nghe trạng thái Theme
+            val isDarkTheme by sharedViewModel.isDarkTheme.collectAsState()
+
+            // 3. Truyền trạng thái vào MusicAppTheme
+            MusicAppTheme(darkTheme = isDarkTheme) {
+
+                val rootNavController = rememberNavController()
 
                 NavHost(
                     navController = rootNavController,
                     startDestination = "main"
                 ) {
-                    // 1. ROUTE "main"
                     composable("main") {
                         MainScreen(
-                            // Truyền ViewModel đã tạo xuống
                             sharedViewModel = sharedViewModel,
                             onFullScreenPlayerRequest = {
                                 rootNavController.navigate("player")
@@ -40,7 +46,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // 2. ROUTE "player"
                     composable(
                         route = "player",
                         enterTransition = {
@@ -49,15 +54,11 @@ class MainActivity : ComponentActivity() {
                         exitTransition = {
                             slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400))
                         },
-                        popEnterTransition = {
-                            // Sửa lại null hoặc hiệu ứng giữ nguyên để mượt hơn
-                            null
-                        },
+                        popEnterTransition = { null },
                         popExitTransition = {
                             slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400))
                         }
                     ) {
-                        // Không tạo mới viewModel ở đây nữa, dùng cái đã có
                         PlayerScreen(
                             onBack = { rootNavController.popBackStack() },
                             viewModel = sharedViewModel

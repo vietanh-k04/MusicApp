@@ -1,3 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MusicApp</string>
+    <string name="app_name">Music App</string>
+
+    <string name="nav_library">Library</string>
+    <string name="nav_discovery">Discovery</string>
+    <string name="nav_charts">Charts</string>
+    <string name="nav_more">More</string>
+
+    <string name="lib_title">Library</string>
+    <string name="lib_favorites">Favorites</string>
+    <string name="lib_playlist">Playlist</string>
+    <string name="lib_album">Album</string>
+    <string name="lib_recent">Recent</string>
+    <string name="lib_local_songs">Local Songs</string>
+
+    <string name="more_title">Settings</string>
+    <string name="more_timer">Sleep Timer</string>
+    <string name="more_timer_desc">Turn off music automatically</string>
+    <string name="more_theme">Dark Theme</string>
+    <string name="more_theme_desc">Switch to dark mode</string>
+    <string name="more_lang">Language</string>
+    <string name="more_lang_desc">English / Tiếng Việt</string>
+    <string name="more_info">About</string>
+    <string name="more_ver">Version 1.0.0</string>
+
+    <string name="dialog_timer_title">Set Sleep Timer</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="minutes">minutes</string>
+
+    <string name="error_data">Unable to load data</string>
+    <string name="error_again">Try again</string>
+    <string name="error_song">No songs found on the device</string>
+    <string name="error_music">Error when loading music or permission not granted!</string>
+
+    <string name="find_singer_song">Search for songs, singers ....</string>
+    <string name="search_sugges">Search suggestions</string>
+    <string name="error_find">Search error</string>
+    <string name="want_listen">You might want to listen</string>
+    <string name="error_sugges">Unable to load suggestions</string>
+    <string name="more_dev">Developed by: Viet Anh</string>
+    <string name="more_reserved">© 2026 All rights reserved</string>
+
 </resources>

@@ -23,7 +23,6 @@ import com.example.musicapp.domain.model.Song
 
 @Composable
 fun ChartSongItem(song: Song, rank: Int, onClick: () -> Unit) {
-    // Logic màu sắc cho Top 1, 2, 3 (Giống Zing MP3)
     val rankColor = when (rank) {
         1 -> Color(0xFF4A90E2) // Xanh dương
         2 -> Color(0xFF50E3C2) // Xanh ngọc
@@ -42,13 +41,12 @@ fun ChartSongItem(song: Song, rank: Int, onClick: () -> Unit) {
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 1. SỐ THỨ TỰ (RANK)
         Text(
             text = "$rank",
             fontSize = rankSize,
             fontWeight = rankWeight,
             color = rankColor,
-            modifier = Modifier.width(40.dp), // Cố định chiều rộng để thẳng hàng
+            modifier = Modifier.width(40.dp),
             textAlign = TextAlign.Center
         )
 

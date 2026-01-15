@@ -23,7 +23,6 @@ class DiscoveryViewModel @Inject constructor(private val repository: MusicReposi
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    // 2. State cho kết quả GỢI Ý NGẪU NHIÊN (Khi chưa tìm gì)
     private val _suggestedUiState = MutableStateFlow<SearchUiState>(SearchUiState.Loading)
     val suggestedUiState = _suggestedUiState.asStateFlow()
 

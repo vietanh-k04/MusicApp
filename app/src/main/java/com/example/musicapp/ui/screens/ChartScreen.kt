@@ -3,6 +3,8 @@ package com.example.musicapp.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
@@ -13,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -20,44 +23,79 @@ import com.example.musicapp.ui.components.ChartSongItem
 import com.example.musicapp.ui.viewmodel.ChartUiState
 import com.example.musicapp.ui.viewmodel.ChartViewModel
 import com.example.musicapp.ui.viewmodel.SharedViewModel
+import com.example.musicapp.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChartScreen(
     chartViewModel: ChartViewModel = hiltViewModel(),
-    sharedViewModel: SharedViewModel // Để phát nhạc
+    sharedViewModel: SharedViewModel
 ) {
     val uiState by chartViewModel.uiState.collectAsState()
+    val selectedCategory by chartViewModel.selectedCategory.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // 1. HEADER #BXH
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp) // Header cao một chút
+                .height(80.dp)
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF8E2DE2), // Màu tím đậm
-                            Color(0xFF4A00E0)  // Màu xanh tím
+                            Color(0xFF8E2DE2), // Tím
+                            Color(0xFF4A00E0)  // Xanh tím
                         )
                     )
                 ),
-            contentAlignment = Alignment.BottomStart
+            contentAlignment = Alignment.CenterStart
         ) {
             Text(
                 text = "#BXH Top Hits",
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
 
-        // 2. DANH SÁCH BÀI HÁT
+        // 2. THANH CHỌN LOẠI BXH (Filter Chips)
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(chartViewModel.categories) { category ->
+                val isSelected = category == selectedCategory
+
+                FilterChip(
+                    selected = isSelected,
+                    onClick = {
+                        if (!isSelected) {
+                            chartViewModel.loadChartData(category)
+                        }
+                    },
+                    label = { Text(category.name) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = Color.White
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = isSelected,
+                        borderColor = if (isSelected) Color.Transparent else Color.Gray.copy(alpha = 0.5f)
+                    )
+                )
+            }
+        }
+
+        HorizontalDivider(thickness = 0.5.dp, color = Color.Gray.copy(alpha = 0.2f))
+
         Box(modifier = Modifier.weight(1f)) {
             when (uiState) {
                 is ChartUiState.Loading -> {
@@ -67,17 +105,14 @@ fun ChartScreen(
                     val songs = (uiState as ChartUiState.Success).songs
 
                     LazyColumn(contentPadding = PaddingValues(bottom = 100.dp)) {
-                        // itemsIndexed cung cấp cả chỉ số (index) để ta tính rank
                         itemsIndexed(songs) { index, song ->
                             ChartSongItem(
                                 song = song,
-                                rank = index + 1, // Rank bắt đầu từ 1
+                                rank = index + 1,
                                 onClick = {
-                                    // Phát nhạc với playlist là danh sách Chart
                                     sharedViewModel.playMusic(song, songs)
                                 }
                             )
-                            // Thêm đường kẻ mờ giữa các bài
                             HorizontalDivider(
                                 modifier = Modifier.padding(start = 60.dp),
                                 thickness = 0.5.dp,
@@ -87,16 +122,17 @@ fun ChartScreen(
                     }
                 }
                 is ChartUiState.Error -> {
-                    Text(
-                        "Không tải được bảng xếp hạng",
-                        color = Color.Gray,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                    Button(
-                        onClick = { chartViewModel.loadChartData() },
-                        modifier = Modifier.align(Alignment.Center).padding(top = 80.dp)
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Thử lại")
+                        Text(stringResource(R.string.error_data), color = Color.Gray)
+                        Button(
+                            onClick = { chartViewModel.loadChartData(selectedCategory) },
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            Text(stringResource(R.string.error_again))
+                        }
                     }
                 }
             }

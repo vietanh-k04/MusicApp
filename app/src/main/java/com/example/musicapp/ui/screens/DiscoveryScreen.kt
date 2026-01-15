@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -26,6 +27,7 @@ import com.example.musicapp.ui.components.SongItem
 import com.example.musicapp.ui.viewmodel.DiscoveryViewModel
 import com.example.musicapp.ui.viewmodel.SearchUiState
 import com.example.musicapp.ui.viewmodel.SharedViewModel
+import com.example.musicapp.R
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +53,7 @@ fun DiscoveryScreen(discoveryViewModel: DiscoveryViewModel = hiltViewModel(), sh
             TextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("Tìm bài hát, ca sĩ...") },
+                placeholder = { Text(stringResource(R.string.find_singer_song)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(24.dp))
@@ -68,7 +70,7 @@ fun DiscoveryScreen(discoveryViewModel: DiscoveryViewModel = hiltViewModel(), sh
                     if (query.isNotEmpty()) {
                         IconButton(onClick = {
                             query = ""
-                            discoveryViewModel.searchOnline("") // Clear search
+                            discoveryViewModel.searchOnline("")
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "Clear")
                         }
@@ -83,14 +85,12 @@ fun DiscoveryScreen(discoveryViewModel: DiscoveryViewModel = hiltViewModel(), sh
             )
         }
 
-        // 2. KẾT QUẢ
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
 
-            // TRƯỜNG HỢP 1: ĐANG TÌM KIẾM (Có chữ trong ô search)
             if (query.isNotEmpty()) {
                 when (searchState) {
                     is SearchUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    is SearchUiState.Error -> Text("Lỗi tìm kiếm", modifier = Modifier.align(Alignment.Center))
+                    is SearchUiState.Error -> Text(stringResource(R.string.error_find), modifier = Modifier.align(Alignment.Center))
                     is SearchUiState.Success -> {
                         val songs = (searchState as SearchUiState.Success).songs
                         LazyColumn(contentPadding = PaddingValues(bottom = 100.dp)) {
@@ -102,13 +102,11 @@ fun DiscoveryScreen(discoveryViewModel: DiscoveryViewModel = hiltViewModel(), sh
                     else -> {}
                 }
             }
-            // TRƯỜNG HỢP 2: MÀN HÌNH KHÁM PHÁ (Chưa gõ gì)
             else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
-                    // Phần A: Gợi ý từ khóa
                     item {
                         SuggestionView(onKeywordClick = { keyword ->
                             query = keyword
@@ -116,7 +114,6 @@ fun DiscoveryScreen(discoveryViewModel: DiscoveryViewModel = hiltViewModel(), sh
                         })
                     }
 
-                    // Phần B: Danh sách nhạc ngẫu nhiên (Có thể bạn muốn nghe)
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -124,7 +121,7 @@ fun DiscoveryScreen(discoveryViewModel: DiscoveryViewModel = hiltViewModel(), sh
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Có thể bạn muốn nghe",
+                                stringResource(R.string.want_listen),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -152,7 +149,7 @@ fun DiscoveryScreen(discoveryViewModel: DiscoveryViewModel = hiltViewModel(), sh
                         }
                         is SearchUiState.Error -> {
                             item {
-                                Text("Không tải được gợi ý", modifier = Modifier.padding(16.dp), color = Color.Gray)
+                                Text(stringResource(R.string.error_sugges), modifier = Modifier.padding(16.dp), color = Color.Gray)
                             }
                         }
                         else -> {}
@@ -170,7 +167,7 @@ fun SuggestionView(onKeywordClick: (String) -> Unit) {
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            "Gợi ý tìm kiếm",
+            stringResource(R.string.search_sugges),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)

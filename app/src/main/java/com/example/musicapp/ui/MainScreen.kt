@@ -24,14 +24,16 @@ import com.example.musicapp.ui.screens.ChartScreen
 import com.example.musicapp.ui.screens.DiscoveryScreen
 import com.example.musicapp.ui.screens.MoreScreen
 import com.example.musicapp.ui.viewmodel.SharedViewModel
+import androidx.compose.ui.res.stringResource
 
 @Composable
-fun MainScreen(sharedViewModel: SharedViewModel, onFullScreenPlayerRequest: () -> Unit) {
+fun MainScreen(
+    sharedViewModel: SharedViewModel,
+    onFullScreenPlayerRequest: () -> Unit
+) {
     val navController = rememberNavController()
-
     val items = listOf(Screen.Library, Screen.Discovery, Screen.Charts, Screen.More)
 
-    // Lấy state từ SharedViewModel để hiển thị MiniPlayer
     val currentSong by sharedViewModel.currentPlayingSong.collectAsState()
     val isPlaying by sharedViewModel.isPlaying.collectAsState()
     val currentPos by sharedViewModel.currentPosition.collectAsState()
@@ -49,7 +51,7 @@ fun MainScreen(sharedViewModel: SharedViewModel, onFullScreenPlayerRequest: () -
                 items.forEach { screen ->
                     NavigationBarItem(
                         icon = { Icon(screen.icon, contentDescription = null) },
-                        label = { Text(screen.title) },
+                        label = { stringResource(screen.title) },
                         selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                         onClick = {
                             navController.navigate(screen.route) {
@@ -71,7 +73,6 @@ fun MainScreen(sharedViewModel: SharedViewModel, onFullScreenPlayerRequest: () -
         }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            // NAV HOST
             NavHost(navController = navController, startDestination = Screen.Library.route) {
 
                 // Tab 1: Thư viện
@@ -84,18 +85,21 @@ fun MainScreen(sharedViewModel: SharedViewModel, onFullScreenPlayerRequest: () -
                     DiscoveryScreen(sharedViewModel = sharedViewModel)
                 }
 
+                // Tab 3: BXH
                 composable(Screen.Charts.route) {
                     ChartScreen(sharedViewModel = sharedViewModel)
                 }
 
-                composable(Screen.More.route) { MoreScreen() }
+                // Tab 4: Thêm (Cài đặt) - Đã thêm tại đây
+                composable(Screen.More.route) {
+                    MoreScreen(sharedViewModel = sharedViewModel)
+                }
             }
 
-            // MINI PLAYER
+            // Mini Player
             if (currentSong != null) {
                 Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                     val progress = if (duration > 0) currentPos.toFloat() / duration.toFloat() else 0f
-
                     MiniPlayer(
                         song = currentSong!!,
                         isPlaying = isPlaying,

@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,6 +30,7 @@ import com.example.musicapp.ui.components.SongItem
 import com.example.musicapp.ui.viewmodel.LibraryUiState
 import com.example.musicapp.ui.viewmodel.LibraryViewModel
 import com.example.musicapp.ui.viewmodel.SharedViewModel
+import com.example.musicapp.R
 
 @Composable
 fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedViewModel: SharedViewModel) {
@@ -37,9 +39,8 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Nền theo giao diện máy (Trắng/Đen)
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // 1. HEADER (Tiêu đề có Gradient nhẹ)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -54,7 +55,7 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
                 .padding(top = 16.dp, bottom = 8.dp)
         ) {
             Text(
-                text = "Thư viện",
+                text = stringResource(R.string.lib_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -62,38 +63,36 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
             )
         }
 
-        // 2. MENU NGANG (Các phím tắt)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            LibraryShortcut(icon = Icons.Default.Favorite, title = "Yêu thích", color = Color(0xFFFF5252)) {}
-            LibraryShortcut(icon = Icons.AutoMirrored.Filled.QueueMusic, title = "Playlist", color = Color(0xFF448AFF)) {}
-            LibraryShortcut(icon = Icons.Default.Album, title = "Album", color = Color(0xFFFFAB40)) {}
-            LibraryShortcut(icon = Icons.Default.History, title = "Gần đây", color = Color(0xFF69F0AE)) {}
+            LibraryShortcut(icon = Icons.Default.Favorite, title = stringResource(R.string.lib_favorites), color = Color(0xFFFF5252)) {}
+            LibraryShortcut(icon = Icons.AutoMirrored.Filled.QueueMusic, stringResource(R.string.lib_playlist), color = Color(0xFF448AFF)) {}
+            LibraryShortcut(icon = Icons.Default.Album, title = stringResource(R.string.lib_album), color = Color(0xFFFFAB40)) {}
+            LibraryShortcut(icon = Icons.Default.History, title = stringResource(R.string.lib_recent), color = Color(0xFF69F0AE)) {}
         }
 
         HorizontalDivider(thickness = 0.5.dp, color = Color.Gray.copy(alpha = 0.3f))
 
         // 3. DANH SÁCH BÀI HÁT
         Text(
-            text = "Nhạc trong máy",
+            text = stringResource(R.string.lib_local_songs),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(16.dp)
         )
 
-        // Vùng hiển thị danh sách
         Box(modifier = Modifier.weight(1f)) {
             when (uiState) {
                 is LibraryUiState.Success -> {
                     val songs = (uiState as LibraryUiState.Success).songs
                     if (songs.isEmpty()) {
                         Text(
-                            "Không tìm thấy bài hát nào trong máy",
+                            stringResource(R.string.error_song),
                             color = Color.Gray,
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -103,14 +102,10 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
                                 SongItem(
                                     song = song,
                                     onClick = {
-                                        // Khi bấm vào bài hát:
-                                        // Gọi SharedViewModel để phát bài đó
-                                        // Và truyền luôn cả danh sách (songs) để nó biết bài tiếp theo là gì
                                         sharedViewModel.playMusic(song, songs)
                                     }
                                 )
                             }
-                            // Thêm khoảng trống dưới cùng để MiniPlayer không che mất bài cuối
                             item { Spacer(modifier = Modifier.height(100.dp)) }
                         }
                     }
@@ -120,7 +115,7 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
                 }
                 is LibraryUiState.Error -> {
                     Text(
-                        "Lỗi khi tải nhạc hoặc chưa cấp quyền!",
+                        stringResource(R.string.error_music),
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -130,7 +125,6 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
     }
 }
 
-// Component con để vẽ các nút menu (Yêu thích, Album...)
 @Composable
 fun LibraryShortcut(icon: ImageVector, title: String, color: Color, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onClick() }) {
@@ -138,7 +132,7 @@ fun LibraryShortcut(icon: ImageVector, title: String, color: Color, onClick: () 
             modifier = Modifier
                 .size(50.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(color.copy(alpha = 0.1f)), // Nền mờ theo màu icon
+                .background(color.copy(alpha = 0.1f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(imageVector = icon, contentDescription = null, tint = color)

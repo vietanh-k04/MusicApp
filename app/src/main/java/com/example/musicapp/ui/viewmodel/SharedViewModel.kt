@@ -2,7 +2,10 @@ package com.example.musicapp.ui.viewmodel
 
 import android.content.ComponentName
 import android.content.Context
+import android.os.CountDownTimer
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -20,10 +23,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.musicapp.data.local.DataStoreManager
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
-class SharedViewModel @Inject constructor(@ApplicationContext private val context: Context) : ViewModel() {
-
+class SharedViewModel @Inject constructor(@ApplicationContext private val context: Context, private val dataStoreManager: DataStoreManager) : ViewModel() {
     private val _currentPlayingSong = MutableStateFlow<Song?>(null)
     val currentPlayingSong = _currentPlayingSong.asStateFlow()
 
@@ -42,7 +47,18 @@ class SharedViewModel @Inject constructor(@ApplicationContext private val contex
     private val _repeatMode = MutableStateFlow(Player.REPEAT_MODE_OFF)
     val repeatMode = _repeatMode.asStateFlow()
 
+    private val _remainingTime = MutableStateFlow<Long?>(null)
+    val remainingTime = _remainingTime.asStateFlow()
+
     private var mediaController: MediaController? = null
+    private var timer: CountDownTimer? = null
+
+    val isDarkTheme = dataStoreManager.isDarkThemeFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     init {
         val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
@@ -59,26 +75,50 @@ class SharedViewModel @Inject constructor(@ApplicationContext private val contex
         }, MoreExecutors.directExecutor())
     }
 
+    // --- LOGIC HẸN GIỜ ---
+    fun setSleepTimer(minutes: Int) {
+        timer?.cancel() // Hủy timer cũ nếu có
 
-    // Hàm Play thông minh: Nhận vào bài hát cần phát + Danh sách bài hát (để làm Playlist)
+        if (minutes == 0) {
+            _remainingTime.value = null
+            return
+        }
+
+        val millis = minutes * 60 * 1000L
+
+        timer = object : CountDownTimer(millis, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                _remainingTime.value = millisUntilFinished
+            }
+
+            override fun onFinish() {
+                _remainingTime.value = null
+                // Hết giờ -> Tắt nhạc
+                mediaController?.pause()
+            }
+        }.start()
+    }
+
+    fun cancelSleepTimer() {
+        timer?.cancel()
+        _remainingTime.value = null
+    }
+
+    // --- PLAYER CONTROLS ---
     fun playMusic(song: Song, playlist: List<Song>) {
         val controller = mediaController ?: return
 
-        // Cập nhật UI ngay
         _currentPlayingSong.value = song
         _isPlaying.value = true
 
-        // Nếu đang bấm đúng bài đang phát -> Chỉ toggle Play/Pause
         if (controller.currentMediaItem?.mediaId == song.id.toString()) {
             if (controller.isPlaying) controller.pause() else controller.play()
             return
         }
 
-        // Tìm vị trí bài hát trong playlist mới
         val index = playlist.indexOfFirst { it.id == song.id }
         if (index == -1) return
 
-        // Biến đổi List<Song> -> List<MediaItem>
         val mediaItems = playlist.map { item ->
             MediaItem.Builder()
                 .setUri(item.contentUri)
@@ -182,6 +222,19 @@ class SharedViewModel @Inject constructor(@ApplicationContext private val contex
 
     override fun onCleared() {
         super.onCleared()
+        timer?.cancel()
         mediaController?.release()
+    }
+
+    fun setDarkTheme(isDark: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.saveTheme(isDark)
+        }
+    }
+
+    fun setLanguage(code: String) {
+        // code là "vi" hoặc "en"
+        val localeList = LocaleListCompat.forLanguageTags(code)
+        AppCompatDelegate.setApplicationLocales(localeList)
     }
 }

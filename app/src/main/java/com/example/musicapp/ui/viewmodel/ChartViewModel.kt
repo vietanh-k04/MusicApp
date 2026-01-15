@@ -16,28 +16,45 @@ sealed interface ChartUiState {
     object Error : ChartUiState
 }
 
+data class ChartCategory(val name: String, val query: String)
+
 @HiltViewModel
 class ChartViewModel @Inject constructor(private val repository: MusicRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ChartUiState>(ChartUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
+    // Danh sách các loại BXH
+    val categories = listOf(
+        ChartCategory("V-Pop", "Top Hits Vietnam"),
+        ChartCategory("US-UK", "Top Hits US UK"),
+        ChartCategory("K-Pop", "K-Pop Top 100"),
+        ChartCategory("Rap Việt", "Rap Viet Hot"),
+        ChartCategory("Indie", "Indie Vietnam")
+    )
+
+    // Lưu trạng thái đang chọn loại nào (Mặc định là cái đầu tiên)
+    private val _selectedCategory = MutableStateFlow(categories[0])
+    val selectedCategory = _selectedCategory.asStateFlow()
+
     init {
-        loadChartData()
+        // Load cái đầu tiên khi mở màn hình
+        loadChartData(categories[0])
     }
 
-    fun loadChartData() {
+    fun loadChartData(category: ChartCategory) {
+        _selectedCategory.value = category
+
         viewModelScope.launch {
             _uiState.value = ChartUiState.Loading
             try {
-                // Giả lập BXH bằng cách tìm các bài hát Hot nhất hiện nay
-                val songs = repository.searchSongs("Top Hits Vietnam 2024")
+                val songs = repository.searchSongs(category.query)
                 if (songs.isNotEmpty()) {
                     _uiState.value = ChartUiState.Success(songs)
                 } else {
                     _uiState.value = ChartUiState.Error
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _uiState.value = ChartUiState.Error
             }
         }

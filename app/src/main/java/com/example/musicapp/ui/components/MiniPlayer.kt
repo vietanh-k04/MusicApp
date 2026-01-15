@@ -42,7 +42,7 @@ fun MiniPlayer(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)) // Màu nền hơi nổi lên chút
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
             .clickable { onClick() }
     ) {
         Row(
@@ -60,8 +60,8 @@ fun MiniPlayer(
                 contentDescription = "Cover",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(48.dp) // Kích thước chuẩn mini
-                    .clip(CircleShape) // Bo tròn như đĩa than (hoặc dùng RoundedCornerShape(4.dp) nếu thích vuông)
+                    .size(48.dp)
+                    .clip(CircleShape)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -87,8 +87,6 @@ fun MiniPlayer(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            // 3. CÁC NÚT ĐIỀU KHIỂN (Bên phải)
 
             // Nút Prev
             IconButton(onClick = onPrev, modifier = Modifier.size(36.dp)) {

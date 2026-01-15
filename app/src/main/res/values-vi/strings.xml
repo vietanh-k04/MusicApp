@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nghe Nhạc</string>
+
+    <string name="nav_library">Thư viện</string>
+    <string name="nav_discovery">Khám phá</string>
+    <string name="nav_charts">#BXH</string>
+    <string name="nav_more">Thêm</string>
+
+    <string name="lib_title">Thư viện</string>
+    <string name="lib_favorites">Yêu thích</string>
+    <string name="lib_playlist">Playlist</string>
+    <string name="lib_album">Album</string>
+    <string name="lib_recent">Gần đây</string>
+    <string name="lib_local_songs">Nhạc trong máy</string>
+
+    <string name="more_title">Cài đặt</string>
+    <string name="more_timer">Hẹn giờ tắt nhạc</string>
+    <string name="more_timer_desc">Tự động tắt sau khoảng thời gian</string>
+    <string name="more_theme">Giao diện tối</string>
+    <string name="more_theme_desc">Chuyển sang nền đen</string>
+    <string name="more_lang">Ngôn ngữ</string>
+    <string name="more_lang_desc">English / Tiếng Việt</string>
+    <string name="more_info">Thông tin</string>
+    <string name="more_ver">Phiên bản 1.0.0</string>
+
+    <string name="dialog_timer_title">Hẹn giờ tắt nhạc</string>
+    <string name="cancel">Hủy</string>
+    <string name="close">Đóng</string>
+    <string name="minutes">phút</string>
+
+    <string name="error_data">Không tải được dữ liệu</string>
+    <string name="error_again">Thử lại</string>
+    <string name="error_song">Không tìm thấy bài hát nào trong máy</string>
+    <string name="error_music">Lỗi khi tải nhạc hoặc chưa cấp quyền!</string>
+
+    <string name="find_singer_song">Tìm kiếm bài hát, ca sĩ ...</string>
+    <string name="search_sugges">Gợi ý tìm kiếm</string>
+    <string name="error_find">Lỗi tìm kiếm</string>
+    <string name="want_listen">Có thể bạn muốn nghe</string>
+    <string name="error_sugges">Không tải được gợi ý</string>
+    <string name="more_dev">Phát triển bởi: Việt Anh</string>
+    <string name="more_reserved">© 2026 Đã đăng ký bản quyền</string>
+
+</resources>
