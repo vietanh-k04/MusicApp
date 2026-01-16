@@ -1,4 +1,4 @@
-package com.example.musicapp.data.local
+package com.example.musicapp.data.local.source
 
 import android.content.ContentUris
 import android.content.Context
@@ -8,6 +8,7 @@ import com.example.musicapp.domain.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import androidx.core.net.toUri
+import com.example.musicapp.domain.model.Album
 
 class LocalMusicSource @Inject constructor(@ApplicationContext private val context: Context) {
     fun getAllSongs(): List<Song> {
@@ -20,20 +21,17 @@ class LocalMusicSource @Inject constructor(@ApplicationContext private val conte
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         }
 
-        // 2. Cột cần lấy
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM_ID,
-            MediaStore.Audio.Media.DURATION // Lấy thêm độ dài
+            MediaStore.Audio.Media.DURATION
         )
 
-        // 3. BỘ LỌC QUAN TRỌNG (Sửa lại đoạn này)
-        // Điều kiện: (IS_MUSIC != 0) VÀ (DURATION >= 30000 ms)
         // Ý nghĩa: Chỉ lấy file được đánh dấu là nhạc VÀ dài hơn 30 giây
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0 AND ${MediaStore.Audio.Media.DURATION} >= ?"
-        val selectionArgs = arrayOf("30000") // 30000 mili giây = 30 giây
+        val selectionArgs = arrayOf("30000")
 
         try {
             val cursor = context.contentResolver.query(
@@ -71,5 +69,47 @@ class LocalMusicSource @Inject constructor(@ApplicationContext private val conte
             e.printStackTrace()
         }
         return songs
+    }
+
+    fun getLocalAlbums(): List<Album> {
+        val albums = mutableListOf<Album>()
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Albums.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
+        }
+
+        val projection = arrayOf(
+            MediaStore.Audio.Albums._ID,
+            MediaStore.Audio.Albums.ALBUM,
+            MediaStore.Audio.Albums.ARTIST,
+            MediaStore.Audio.Albums.NUMBER_OF_SONGS
+        )
+
+        try {
+            val cursor = context.contentResolver.query(
+                collection, projection, null, null, "${MediaStore.Audio.Albums.ALBUM} ASC"
+            )
+
+            cursor?.use {
+                val idCol = it.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
+                val nameCol = it.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)
+                val artistCol = it.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)
+                val countCol = it.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS)
+
+                while (it.moveToNext()) {
+                    val id = it.getLong(idCol)
+                    val name = it.getString(nameCol) ?: "Unknown Album"
+                    val artist = it.getString(artistCol) ?: "Unknown Artist"
+                    val count = it.getInt(countCol)
+
+                    val sArtworkUri = "content://media/external/audio/albumart".toUri()
+                    val albumArtUri = ContentUris.withAppendedId(sArtworkUri, id).toString()
+
+                    albums.add(Album(id, name, artist, albumArtUri, count))
+                }
+            }
+        } catch (e: Exception) { e.printStackTrace() }
+        return albums
     }
 }

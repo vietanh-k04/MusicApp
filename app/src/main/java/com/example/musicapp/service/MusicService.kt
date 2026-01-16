@@ -6,6 +6,7 @@ import android.media.AudioManager
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.example.musicapp.receiver.HeadsetReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -17,14 +18,11 @@ class MusicService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
 
-    // Khai báo biến Receiver
     private var headsetReceiver: HeadsetReceiver? = null
 
     override fun onCreate() {
         super.onCreate()
         mediaSession = MediaSession.Builder(this, player).build()
-
-        // --- BẮT ĐẦU ĐOẠN CODE BROADCAST RECEIVER ---
 
         // 1. Khởi tạo Receiver
         headsetReceiver = HeadsetReceiver(player)
@@ -37,8 +35,6 @@ class MusicService : MediaSessionService() {
 
         // 3. Đăng ký với hệ thống
         registerReceiver(headsetReceiver, filter)
-
-        // --- KẾT THÚC ĐOẠN CODE BROADCAST RECEIVER ---
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
@@ -52,7 +48,6 @@ class MusicService : MediaSessionService() {
             mediaSession = null
         }
 
-        // --- QUAN TRỌNG: Hủy đăng ký Receiver khi Service chết để tránh lỗi ---
         headsetReceiver?.let {
             unregisterReceiver(it)
         }

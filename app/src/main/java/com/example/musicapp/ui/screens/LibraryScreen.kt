@@ -31,9 +31,10 @@ import com.example.musicapp.ui.viewmodel.LibraryUiState
 import com.example.musicapp.ui.viewmodel.LibraryViewModel
 import com.example.musicapp.ui.viewmodel.SharedViewModel
 import com.example.musicapp.R
+import com.example.musicapp.ui.navigation.Screen
 
 @Composable
-fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedViewModel: SharedViewModel) {
+fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedViewModel: SharedViewModel, onNavigateTo: (String) -> Unit) {
     val uiState by libraryViewModel.uiState.collectAsState()
 
     Column(
@@ -69,10 +70,18 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            LibraryShortcut(icon = Icons.Default.Favorite, title = stringResource(R.string.lib_favorites), color = Color(0xFFFF5252)) {}
-            LibraryShortcut(icon = Icons.AutoMirrored.Filled.QueueMusic, stringResource(R.string.lib_playlist), color = Color(0xFF448AFF)) {}
-            LibraryShortcut(icon = Icons.Default.Album, title = stringResource(R.string.lib_album), color = Color(0xFFFFAB40)) {}
-            LibraryShortcut(icon = Icons.Default.History, title = stringResource(R.string.lib_recent), color = Color(0xFF69F0AE)) {}
+            LibraryShortcut(icon = Icons.Default.Favorite, title = stringResource(R.string.lib_favorites), color = Color(0xFFFF5252)) {
+                onNavigateTo(Screen.Favorite.route)
+            }
+            LibraryShortcut(icon = Icons.AutoMirrored.Filled.QueueMusic, stringResource(R.string.lib_playlist), color = Color(0xFF448AFF)) {
+                onNavigateTo(Screen.Playlists.route)
+            }
+            LibraryShortcut(icon = Icons.Default.Album, title = stringResource(R.string.lib_album), color = Color(0xFFFFAB40)) {
+                onNavigateTo(Screen.Albums.route)
+            }
+            LibraryShortcut(icon = Icons.Default.History, title = stringResource(R.string.lib_recent), color = Color(0xFF69F0AE)) {
+                onNavigateTo(Screen.History.route)
+            }
         }
 
         HorizontalDivider(thickness = 0.5.dp, color = Color.Gray.copy(alpha = 0.3f))
@@ -86,7 +95,7 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
             modifier = Modifier.padding(16.dp)
         )
 
-        Box(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
             when (uiState) {
                 is LibraryUiState.Success -> {
                     val songs = (uiState as LibraryUiState.Success).songs

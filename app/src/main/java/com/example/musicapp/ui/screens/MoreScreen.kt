@@ -32,7 +32,6 @@ import com.example.musicapp.utils.formatDuration
 fun MoreScreen(sharedViewModel: SharedViewModel) {
     val remainingTime by sharedViewModel.remainingTime.collectAsState()
 
-    // Lấy trạng thái Dark Mode từ ViewModel
     val isDarkTheme by sharedViewModel.isDarkTheme.collectAsState()
 
     var showTimerDialog by remember { mutableStateOf(false) }
@@ -76,14 +75,13 @@ fun MoreScreen(sharedViewModel: SharedViewModel) {
             onClick = { showTimerDialog = true }
         )
 
-        // Giao diện (Đã hoạt động)
+        // Giao diện
         SettingItem(
             icon = Icons.Default.DarkMode,
             title = stringResource(R.string.more_theme),
             subtitle = stringResource(R.string.more_theme_desc),
             iconColor = Color(0xFF9C27B0),
             onClick = {
-                // Cho phép bấm vào cả dòng cũng đổi
                 sharedViewModel.setDarkTheme(!isDarkTheme)
             },
             trailing = {

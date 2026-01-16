@@ -11,4 +11,10 @@ sealed class Screen(val route: String, @StringRes val title: Int, val icon: Imag
     object Discovery : Screen("discovery", R.string.nav_discovery, Icons.Default.Search)
     object Charts : Screen("charts", R.string.nav_charts, Icons.Default.BarChart)
     object More : Screen("more", R.string.nav_more, Icons.Default.Settings)
+
+    object Favorite : Screen("favorite", R.string.lib_favorites, Icons.Default.Favorite)
+    object History : Screen("history", R.string.lib_recent, Icons.Default.History)
+    object Albums : Screen("albums", R.string.lib_album, Icons.Default.Album)
+    object Playlists : Screen("playlists", R.string.lib_playlist, Icons.Default.List)
+
 }

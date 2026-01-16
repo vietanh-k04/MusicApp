@@ -1,4 +1,4 @@
-package com.example.musicapp.data.local
+package com.example.musicapp.data.local.source
 
 import android.content.Context
 import androidx.datastore.core.DataStore

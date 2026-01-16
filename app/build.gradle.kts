@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
 
@@ -84,8 +85,13 @@ dependencies {
     // 5. Image Loading (Coil) - Để load ảnh bìa album
     implementation(libs.coil.compose)
 
-    // Coroutines: Để chạy tác vụ mạng không làm đơ giao diện (nếu chưa có)
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+
 }

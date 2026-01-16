@@ -25,6 +25,10 @@ import com.example.musicapp.ui.screens.DiscoveryScreen
 import com.example.musicapp.ui.screens.MoreScreen
 import com.example.musicapp.ui.viewmodel.SharedViewModel
 import androidx.compose.ui.res.stringResource
+import com.example.musicapp.ui.screens.libraryChildScreens.AlbumScreen
+import com.example.musicapp.ui.screens.libraryChildScreens.FavoriteScreen
+import com.example.musicapp.ui.screens.libraryChildScreens.HistoryScreen
+import com.example.musicapp.ui.screens.libraryChildScreens.PlaylistScreen
 
 @Composable
 fun MainScreen(
@@ -77,7 +81,20 @@ fun MainScreen(
 
                 // Tab 1: Thư viện
                 composable(Screen.Library.route) {
-                    LibraryScreen(sharedViewModel = sharedViewModel)
+                    LibraryScreen(sharedViewModel = sharedViewModel, onNavigateTo = { route -> navController.navigate(route) })
+                }
+
+                composable(Screen.Favorite.route) {
+                    FavoriteScreen(sharedViewModel = sharedViewModel, onBack = { navController.popBackStack() })
+                }
+                composable(Screen.History.route) {
+                    HistoryScreen(sharedViewModel = sharedViewModel, onBack = { navController.popBackStack() })
+                }
+                composable(Screen.Albums.route) {
+                    AlbumScreen(onBack = { navController.popBackStack() })
+                }
+                composable(Screen.Playlists.route) {
+                    PlaylistScreen(onBack = { navController.popBackStack() })
                 }
 
                 // Tab 2: Khám phá

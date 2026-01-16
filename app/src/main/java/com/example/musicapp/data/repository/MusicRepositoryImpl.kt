@@ -1,19 +1,28 @@
 package com.example.musicapp.data.repository
 
-import com.example.musicapp.data.local.LocalMusicSource
+import com.example.musicapp.data.local.dao.MusicDao
+import com.example.musicapp.data.local.db.FavoriteSongEntity
+import com.example.musicapp.data.local.db.HistorySongEntity
+import com.example.musicapp.data.local.db.PlaylistEntity
+import com.example.musicapp.data.local.source.LocalMusicSource
 import com.example.musicapp.data.remote.api.ITunesApiService
+import com.example.musicapp.domain.model.Album
 import com.example.musicapp.domain.model.Song
 import com.example.musicapp.domain.repository.MusicRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class MusicRepositoryImpl @Inject constructor(private val localMusicSource: LocalMusicSource, private val apiService: ITunesApiService) :
+class MusicRepositoryImpl @Inject constructor(private val localMusicSource: LocalMusicSource, private val apiService: ITunesApiService, private val musicDao: MusicDao) :
     MusicRepository {
 
-    // Chuyển sang IO Thread để không làm đơ giao diện khi quét nhạc
     override suspend fun getLocalSongs(): List<Song> = withContext(Dispatchers.IO) {
         localMusicSource.getAllSongs()
+    }
+
+    override suspend fun getLocalAlbums(): List<Album> = withContext(Dispatchers.IO) {
+        localMusicSource.getLocalAlbums()
     }
 
     override suspend fun searchSongs(query: String): List<Song> = withContext(Dispatchers.IO) {
@@ -38,5 +47,33 @@ class MusicRepositoryImpl @Inject constructor(private val localMusicSource: Loca
             e.printStackTrace()
             emptyList()
         }
+    }
+
+    override fun getAllFavorites(): Flow<List<FavoriteSongEntity>> = musicDao.getAllFavorites()
+
+    override suspend fun insertFavorite(song: Song) {
+        musicDao.insertFavorite(
+            FavoriteSongEntity(song.id ?: 0, song.title?:"", song.artist?:"", song.contentUri?:"", song.albumArtUri?:"")
+        )
+    }
+
+    override suspend fun removeFavorite(songId: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override fun isFavorite(songId: Long): Flow<Boolean> = musicDao.isFavorite(songId)
+
+    override fun getHistory(): Flow<List<HistorySongEntity>> = musicDao.getHistory()
+
+    override suspend fun addToHistory(song: Song) {
+        musicDao.insertHistory(
+            HistorySongEntity(song.id ?: 0, song.title?:"", song.artist?:"", song.contentUri?:"", song.albumArtUri?:"")
+        )
+    }
+
+    override fun getAllPlaylists(): Flow<List<PlaylistEntity>> = musicDao.getAllPlaylists()
+
+    override suspend fun createPlaylist(name: String) {
+        musicDao.insertPlaylist(PlaylistEntity(playlistName = name))
     }
 }
