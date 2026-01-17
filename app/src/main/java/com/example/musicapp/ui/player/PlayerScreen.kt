@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -36,29 +38,28 @@ import com.example.musicapp.utils.formatDuration
 
 @Composable
 fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
-    // 1. Lấy các State từ ViewModel
     val currentSong by viewModel.currentPlayingSong.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val currentPos by viewModel.currentPosition.collectAsState()
     val duration by viewModel.duration.collectAsState()
     val shuffleMode by viewModel.shuffleMode.collectAsState()
     val repeatMode by viewModel.repeatMode.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState()
 
-    // 2. Logic Animation xoay ảnh đĩa nhạc
+    // Logic Animation xoay ảnh đĩa nhạc
     val infiniteTransition = rememberInfiniteTransition(label = "rotate")
     val angle by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing) // Xoay 1 vòng trong 10 giây
+            animation = tween(10000, easing = LinearEasing)
         ),
         label = "rotation"
     )
-    // Nếu đang phát thì lấy góc xoay, nếu dừng thì giữ nguyên (hoặc về 0 tuỳ logic, ở đây ta để 0 cho đơn giản)
-    // Lưu ý: Để dừng xoay tại chỗ cần logic phức tạp hơn, tạm thời ta dùng logic: Nhạc chạy -> Xoay.
+    // Nếu đang phát thì xoay, dừng thì đứng im (hoặc về 0)
     val rotationState = if (isPlaying) angle else 0f
 
-    // 3. Nếu không có bài hát nào (trường hợp hiếm), quay về
+    // 3. Nếu không có bài hát nào, quay về
     if (currentSong == null) {
         onBack()
         return
@@ -77,7 +78,6 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // --- HEADER: NÚT BACK ---
         Row(modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = onBack) {
                 Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Back", tint = Color.White)
@@ -86,7 +86,6 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // --- ẢNH BÌA (ALBUM ART) ---
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(song.albumArtUri)
@@ -96,35 +95,49 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(300.dp)
-                .rotate(rotationState) // <--- SỬ DỤNG BIẾN rotationState TẠI ĐÂY
-                .clip(CircleShape)     // Bo tròn thành đĩa nhạc
-                .background(Color.DarkGray, CircleShape) // Viền nền
+                .rotate(rotationState)
+                .clip(CircleShape)
+                .background(Color.DarkGray, CircleShape)
                 .padding(2.dp)
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        // --- TÊN BÀI HÁT & CA SĨ ---
-        Text(
-            text = song.title ?: "Unknown",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = song.artist ?: "Unknown",
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.Gray,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = song.title ?: "Unknown",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = song.artist ?: "Unknown",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            IconButton(onClick = { viewModel.toggleFavorite() }) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Like",
+                    tint = if (isFavorite) Color.Red else Color.White,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // --- THANH THỜI GIAN (SLIDER) ---
-        // Đặt ở trên các nút điều khiển (Chuẩn UX)
         Column(modifier = Modifier.fillMaxWidth()) {
             Slider(
                 value = currentPos.toFloat(),
@@ -150,7 +163,6 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // --- CÁC NÚT ĐIỀU KHIỂN ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -171,7 +183,7 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
                 Icon(Icons.Default.SkipPrevious, contentDescription = "Prev", tint = Color.White, modifier = Modifier.size(40.dp))
             }
 
-            // 3. Play/Pause (To nhất ở giữa)
+            // 3. Play/Pause
             IconButton(
                 onClick = { viewModel.toggleMusic() },
                 modifier = Modifier

@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,8 +30,12 @@ class LibraryViewModel @Inject constructor(private val repository: MusicReposito
     val albumsState = _albumsState.asStateFlow()
 
     val favoriteSongs = repository.getAllFavorites()
+        .map { list ->
+            list.map { entity ->
+                Song(entity.id, entity.title, entity.artist, entity.contentUri, entity.albumArtUri)
+            }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     val historySongs = repository.getHistory()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

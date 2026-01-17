@@ -30,7 +30,6 @@ fun FavoriteScreen(
         } else {
             LazyColumn {
                 items(favorites) { entity ->
-                    // Convert Entity -> Song Model
                     val song = Song(entity.id, entity.title, entity.artist, entity.contentUri, entity.albumArtUri)
                     SongItem(song = song, onClick = {
                         // Phát nhạc: Chuyển toàn bộ list favorite thành playlist

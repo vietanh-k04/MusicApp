@@ -12,8 +12,8 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFavorite(song: FavoriteSongEntity)
 
-    @Delete
-    suspend fun removeFavorite(song: FavoriteSongEntity)
+    @Query("DELETE FROM favorite_songs WHERE id = :songId")
+    suspend fun deleteFavoriteById(songId: Long)
 
     @Query("SELECT EXISTS(SELECT 1 FROM favorite_songs WHERE id = :id)")
     fun isFavorite(id: Long): Flow<Boolean>

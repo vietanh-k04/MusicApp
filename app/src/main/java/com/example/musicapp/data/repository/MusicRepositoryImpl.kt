@@ -58,7 +58,7 @@ class MusicRepositoryImpl @Inject constructor(private val localMusicSource: Loca
     }
 
     override suspend fun removeFavorite(songId: Long) {
-        TODO("Not yet implemented")
+        musicDao.deleteFavoriteById(songId)
     }
 
     override fun isFavorite(songId: Long): Flow<Boolean> = musicDao.isFavorite(songId)
