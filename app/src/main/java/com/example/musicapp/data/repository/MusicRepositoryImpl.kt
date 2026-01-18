@@ -4,6 +4,7 @@ import com.example.musicapp.data.local.dao.MusicDao
 import com.example.musicapp.data.local.db.FavoriteSongEntity
 import com.example.musicapp.data.local.db.HistorySongEntity
 import com.example.musicapp.data.local.db.PlaylistEntity
+import com.example.musicapp.data.local.db.PlaylistSongEntity
 import com.example.musicapp.data.local.source.LocalMusicSource
 import com.example.musicapp.data.remote.api.ITunesApiService
 import com.example.musicapp.domain.model.Album
@@ -11,6 +12,7 @@ import com.example.musicapp.domain.model.Song
 import com.example.musicapp.domain.repository.MusicRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -75,5 +77,34 @@ class MusicRepositoryImpl @Inject constructor(private val localMusicSource: Loca
 
     override suspend fun createPlaylist(name: String) {
         musicDao.insertPlaylist(PlaylistEntity(playlistName = name))
+    }
+
+    override suspend fun deletePlaylist(playlistId: Long) {
+        musicDao.deletePlaylist(playlistId)
+    }
+
+    override fun getSongsByPlaylistId(playlistId: Long): Flow<List<Song>> {
+        return musicDao.getSongsByPlaylistId(playlistId).map { entities ->
+            entities.map { entity ->
+                Song(entity.songId, entity.title, entity.artist, entity.contentUri, entity.albumArtUri)
+            }
+        }
+    }
+
+    override suspend fun addSongToPlaylist(playlistId: Long, song: Song) {
+        musicDao.insertSongToPlaylist(
+            PlaylistSongEntity(
+                playlistId = playlistId,
+                songId = song.id ?: 0,
+                title = song.title ?: "",
+                artist = song.artist ?: "",
+                contentUri = song.contentUri ?: "",
+                albumArtUri = song.albumArtUri ?: ""
+            )
+        )
+    }
+
+    override suspend fun removeSongFromPlaylist(playlistId: Long, songId: Long) {
+        musicDao.removeSongFromPlaylist(playlistId, songId)
     }
 }

@@ -6,6 +6,7 @@ import com.example.musicapp.domain.model.Album
 import com.example.musicapp.domain.model.Song
 import com.example.musicapp.domain.repository.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,6 +65,28 @@ class LibraryViewModel @Inject constructor(private val repository: MusicReposito
     fun createPlaylist(name: String) {
         viewModelScope.launch {
             repository.createPlaylist(name)
+        }
+    }
+
+    fun deletePlaylist(playlistId: Long) {
+        viewModelScope.launch {
+            repository.deletePlaylist(playlistId)
+        }
+    }
+
+    fun removeSongFromPlaylist(playlistId: Long, songId: Long) {
+        viewModelScope.launch {
+            repository.removeSongFromPlaylist(playlistId, songId)
+        }
+    }
+
+    fun getPlaylistSongs(playlistId: Long): Flow<List<Song>> {
+        return repository.getSongsByPlaylistId(playlistId)
+    }
+
+    fun addSongToPlaylist(playlistId: Long, song: Song) {
+        viewModelScope.launch {
+            repository.addSongToPlaylist(playlistId, song)
         }
     }
 }

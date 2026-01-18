@@ -10,9 +10,9 @@ import com.example.musicapp.data.local.db.*
         FavoriteSongEntity::class,
         HistorySongEntity::class,
         PlaylistEntity::class,
-        PlaylistSongCrossRef::class
+        PlaylistSongEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 

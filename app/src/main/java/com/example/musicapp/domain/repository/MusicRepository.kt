@@ -29,4 +29,13 @@ interface MusicRepository {
     fun getAllPlaylists(): Flow<List<PlaylistEntity>>
 
     suspend fun createPlaylist(name: String)
+
+    suspend fun deletePlaylist(playlistId: Long)
+
+    fun getSongsByPlaylistId(playlistId: Long): Flow<List<Song>>
+
+    suspend fun addSongToPlaylist(playlistId: Long, song: Song)
+
+    suspend fun removeSongFromPlaylist(playlistId: Long, songId: Long)
+
 }

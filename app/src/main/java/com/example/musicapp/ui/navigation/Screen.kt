@@ -2,6 +2,7 @@ package com.example.musicapp.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.musicapp.R
@@ -15,6 +16,9 @@ sealed class Screen(val route: String, @StringRes val title: Int, val icon: Imag
     object Favorite : Screen("favorite", R.string.lib_favorites, Icons.Default.Favorite)
     object History : Screen("history", R.string.lib_recent, Icons.Default.History)
     object Albums : Screen("albums", R.string.lib_album, Icons.Default.Album)
-    object Playlists : Screen("playlists", R.string.lib_playlist, Icons.Default.List)
+    object Playlists : Screen("playlists", R.string.lib_playlist, Icons.AutoMirrored.Filled.List)
 
+    object PlaylistDetail : Screen("playlist_detail/{id}/{name}", R.string.lib_playlist, Icons.AutoMirrored.Filled.List) {
+        fun createRoute(id: Long, name: String) = "playlist_detail/$id/$name"
+    }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,11 +21,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.musicapp.ui.viewmodel.LibraryViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistScreen(
     viewModel: LibraryViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToDetail: (Long, String) -> Unit
 ) {
     val playlists by viewModel.playlists.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -55,8 +58,17 @@ fun PlaylistScreen(
                             Icon(Icons.Default.MusicNote, null, modifier = Modifier.size(40.dp).background(Color.LightGray, RoundedCornerShape(8.dp)).padding(8.dp))
                         },
                         headlineContent = { Text(playlist.playlistName, fontWeight = FontWeight.Bold) },
-                        supportingContent = { Text("Được tạo lúc: ...") },
-                        modifier = Modifier.clickable { /* TODO: Mở chi tiết playlist */ }
+                        supportingContent = { Text("ID: ${playlist.playlistId}") },
+                        modifier = Modifier.clickable {
+                            onNavigateToDetail(playlist.playlistId, playlist.playlistName)
+                        },
+                        trailingContent = {
+                            IconButton(onClick = {
+                                viewModel.deletePlaylist(playlist.playlistId)
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Gray)
+                            }
+                        }
                     )
                     HorizontalDivider()
                 }

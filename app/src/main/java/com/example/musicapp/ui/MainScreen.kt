@@ -25,9 +25,12 @@ import com.example.musicapp.ui.screens.DiscoveryScreen
 import com.example.musicapp.ui.screens.MoreScreen
 import com.example.musicapp.ui.viewmodel.SharedViewModel
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.musicapp.ui.screens.libraryChildScreens.AlbumScreen
 import com.example.musicapp.ui.screens.libraryChildScreens.FavoriteScreen
 import com.example.musicapp.ui.screens.libraryChildScreens.HistoryScreen
+import com.example.musicapp.ui.screens.libraryChildScreens.PlaylistDetailScreen
 import com.example.musicapp.ui.screens.libraryChildScreens.PlaylistScreen
 
 @Composable
@@ -94,10 +97,14 @@ fun MainScreen(
                     AlbumScreen(onBack = { navController.popBackStack() })
                 }
                 composable(Screen.Playlists.route) {
-                    PlaylistScreen(onBack = { navController.popBackStack() })
+                    PlaylistScreen(
+                        onBack = { navController.popBackStack() },
+                        onNavigateToDetail = { id, name ->
+                            navController.navigate(Screen.PlaylistDetail.createRoute(id, name))
+                        }
+                    )
                 }
 
-                // Tab 2: Khám phá
                 composable(Screen.Discovery.route) {
                     DiscoveryScreen(sharedViewModel = sharedViewModel)
                 }
@@ -110,6 +117,24 @@ fun MainScreen(
                 // Tab 4: Thêm (Cài đặt) - Đã thêm tại đây
                 composable(Screen.More.route) {
                     MoreScreen(sharedViewModel = sharedViewModel)
+                }
+
+                composable(
+                    route = Screen.PlaylistDetail.route,
+                    arguments = listOf(
+                        navArgument("id") { type = NavType.LongType },
+                        navArgument("name") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val id = backStackEntry.arguments?.getLong("id") ?: 0L
+                    val name = backStackEntry.arguments?.getString("name") ?: "Playlist"
+
+                    PlaylistDetailScreen(
+                        playlistId = id,
+                        playlistName = name,
+                        onBack = { navController.popBackStack() },
+                        sharedViewModel = sharedViewModel
+                    )
                 }
             }
 

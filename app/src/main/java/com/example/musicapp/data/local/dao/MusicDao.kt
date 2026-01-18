@@ -30,6 +30,18 @@ interface MusicDao {
     @Query("SELECT * FROM playlists ORDER BY createdAt DESC")
     fun getAllPlaylists(): Flow<List<PlaylistEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addSongToPlaylist(crossRef: PlaylistSongCrossRef)
+    @Query("DELETE FROM playlists WHERE playlistId = :playlistId")
+    suspend fun deletePlaylist(playlistId: Long)
+
+    @Query("DELETE FROM playlist_songs WHERE playlistId = :playlistId")
+    suspend fun deleteAllSongsInPlaylist(playlistId: Long)
+
+    @Query("SELECT * FROM playlist_songs WHERE playlistId = :playlistId")
+    fun getSongsByPlaylistId(playlistId: Long): Flow<List<PlaylistSongEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSongToPlaylist(song: PlaylistSongEntity)
+
+    @Query("DELETE FROM playlist_songs WHERE playlistId = :playlistId AND songId = :songId")
+    suspend fun removeSongFromPlaylist(playlistId: Long, songId: Long)
 }

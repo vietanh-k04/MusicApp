@@ -16,6 +16,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,12 +34,18 @@ import com.example.musicapp.ui.viewmodel.LibraryUiState
 import com.example.musicapp.ui.viewmodel.LibraryViewModel
 import com.example.musicapp.ui.viewmodel.SharedViewModel
 import com.example.musicapp.R
+import com.example.musicapp.domain.model.Song
+import com.example.musicapp.ui.components.AddToPlaylistDialog
 import com.example.musicapp.ui.navigation.Screen
 
 @Composable
 fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedViewModel: SharedViewModel, onNavigateTo: (String) -> Unit) {
     val uiState by libraryViewModel.uiState.collectAsState()
 
+    val playlists by libraryViewModel.playlists.collectAsState()
+
+    var showAddToPlaylistDialog by remember { mutableStateOf(false) }
+    var selectedSongToAdd by remember { mutableStateOf<Song?>(null) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,11 +121,30 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
                                     song = song,
                                     onClick = {
                                         sharedViewModel.playMusic(song, songs)
+                                    },
+                                    onLongClick = {
+                                        selectedSongToAdd = song
+                                        showAddToPlaylistDialog = true
                                     }
                                 )
                             }
                             item { Spacer(modifier = Modifier.height(100.dp)) }
                         }
+                    }
+
+                    if (showAddToPlaylistDialog && selectedSongToAdd != null) {
+                        AddToPlaylistDialog(
+                            playlists = playlists,
+                            onDismiss = { showAddToPlaylistDialog = false },
+                            onPlaylistSelected = { playlist ->
+                                libraryViewModel.addSongToPlaylist(playlist.playlistId, selectedSongToAdd!!)
+                                showAddToPlaylistDialog = false
+                            },
+                            onCreateNew = {
+                                onNavigateTo(Screen.Playlists.route)
+                                showAddToPlaylistDialog = false
+                            }
+                        )
                     }
                 }
                 is LibraryUiState.Loading -> {
@@ -132,6 +160,7 @@ fun LibraryScreen(libraryViewModel: LibraryViewModel = hiltViewModel(), sharedVi
             }
         }
     }
+
 }
 
 @Composable
