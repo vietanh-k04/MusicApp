@@ -1,5 +1,6 @@
 package com.example.musicapp.ui
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,15 +28,22 @@ import com.example.musicapp.ui.viewmodel.SharedViewModel
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.musicapp.ui.screens.AppHeader
+import com.example.musicapp.ui.screens.libraryChildScreens.AlbumDetailScreen
 import com.example.musicapp.ui.screens.libraryChildScreens.AlbumScreen
 import com.example.musicapp.ui.screens.libraryChildScreens.FavoriteScreen
 import com.example.musicapp.ui.screens.libraryChildScreens.HistoryScreen
 import com.example.musicapp.ui.screens.libraryChildScreens.PlaylistDetailScreen
 import com.example.musicapp.ui.screens.libraryChildScreens.PlaylistScreen
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import com.example.musicapp.ui.viewmodel.SettingsViewModel
 
 @Composable
 fun MainScreen(
     sharedViewModel: SharedViewModel,
+    settingsViewModel: SettingsViewModel,
     onFullScreenPlayerRequest: () -> Unit
 ) {
     val navController = rememberNavController()
@@ -47,6 +55,9 @@ fun MainScreen(
     val duration by sharedViewModel.duration.collectAsState()
 
     Scaffold(
+        topBar = {
+            AppHeader()
+        },
         bottomBar = {
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -94,8 +105,15 @@ fun MainScreen(
                     HistoryScreen(sharedViewModel = sharedViewModel, onBack = { navController.popBackStack() })
                 }
                 composable(Screen.Albums.route) {
-                    AlbumScreen(onBack = { navController.popBackStack() })
+                    AlbumScreen(
+                        onBack = { navController.popBackStack() },
+                        onAlbumClick = { _, artistName ->
+                            val encodedName = Uri.encode(artistName)
+                            navController.navigate(Screen.AlbumDetail.createRoute(encodedName))
+                        }
+                    )
                 }
+
                 composable(Screen.Playlists.route) {
                     PlaylistScreen(
                         onBack = { navController.popBackStack() },
@@ -109,14 +127,12 @@ fun MainScreen(
                     DiscoveryScreen(sharedViewModel = sharedViewModel)
                 }
 
-                // Tab 3: BXH
                 composable(Screen.Charts.route) {
                     ChartScreen(sharedViewModel = sharedViewModel)
                 }
 
-                // Tab 4: Thêm (Cài đặt) - Đã thêm tại đây
                 composable(Screen.More.route) {
-                    MoreScreen(sharedViewModel = sharedViewModel)
+                    MoreScreen(sharedViewModel = sharedViewModel, settingsViewModel = settingsViewModel)
                 }
 
                 composable(
@@ -136,20 +152,55 @@ fun MainScreen(
                         sharedViewModel = sharedViewModel
                     )
                 }
-            }
 
-            // Mini Player
+                composable(
+                    route = Screen.AlbumDetail.route,
+                    arguments = listOf(
+                        navArgument("name") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val artistName = backStackEntry.arguments?.getString("name") ?: ""
+
+                    AlbumDetailScreen(
+                        artistName = artistName,
+                        onBack = { navController.popBackStack() },
+                        sharedViewModel = sharedViewModel
+                    )
+                }
+            }
             if (currentSong != null) {
                 Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                     val progress = if (duration > 0) currentPos.toFloat() / duration.toFloat() else 0f
-                    MiniPlayer(
-                        song = currentSong!!,
-                        isPlaying = isPlaying,
-                        progress = progress,
-                        onTogglePlay = { sharedViewModel.toggleMusic() },
-                        onNext = { sharedViewModel.skipToNext() },
-                        onPrev = { sharedViewModel.skipToPrevious() },
-                        onClick = { onFullScreenPlayerRequest() }
+
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { value ->
+                            if (value == SwipeToDismissBoxValue.EndToStart) {
+                                sharedViewModel.stopMusic()
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                    )
+
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        enableDismissFromStartToEnd = false,
+                        enableDismissFromEndToStart = true,
+                        backgroundContent = {
+                            Box(modifier = Modifier.fillMaxSize().padding(16.dp))
+                        },
+                        content = {
+                            MiniPlayer(
+                                song = currentSong!!,
+                                isPlaying = isPlaying,
+                                progress = progress,
+                                onTogglePlay = { sharedViewModel.toggleMusic() },
+                                onNext = { sharedViewModel.skipToNext() },
+                                onPrev = { sharedViewModel.skipToPrevious() },
+                                onClick = { onFullScreenPlayerRequest() }
+                            )
+                        }
                     )
                 }
             }

@@ -11,31 +11,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.musicapp.R
-import com.example.musicapp.domain.model.Song
 import com.example.musicapp.ui.components.SongItem
 import com.example.musicapp.ui.viewmodel.LibraryViewModel
 import com.example.musicapp.ui.viewmodel.SharedViewModel
 
 @Composable
-fun HistoryScreen(
+fun AlbumDetailScreen(
+    artistName: String,
+    onBack: () -> Unit,
     viewModel: LibraryViewModel = hiltViewModel(),
-    sharedViewModel: SharedViewModel,
-    onBack: () -> Unit
+    sharedViewModel: SharedViewModel
 ) {
-    val history by viewModel.historySongs.collectAsState()
+    LaunchedEffect(artistName) {
+        viewModel.loadSongsByArtist(artistName)
+    }
 
-    SimpleListScreen(title = stringResource(R.string.recent_hint), onBack = onBack) {
-        if (history.isEmpty()) {
+    val songs by viewModel.artistSongs.collectAsState()
+
+    SimpleListScreen(title = "${stringResource(R.string.albumn_hint)} $artistName", onBack = onBack) {
+        if (songs.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.recent_empty), color = Color.Gray)
+                Text(stringResource(R.string.albumn_load), color = Color.Gray)
             }
         } else {
             LazyColumn {
-                items(history) { entity ->
-                    val song = Song(entity.id, entity.title, entity.artist, entity.contentUri, entity.albumArtUri)
+                items(songs) { song ->
                     SongItem(song = song, onClick = {
-                        val playlist = history.map { Song(it.id, it.title, it.artist, it.contentUri, it.albumArtUri) }
-                        sharedViewModel.playMusic(song, playlist)
+                        sharedViewModel.playMusic(song, songs)
                     })
                 }
             }

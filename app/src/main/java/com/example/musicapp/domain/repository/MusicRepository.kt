@@ -38,4 +38,6 @@ interface MusicRepository {
 
     suspend fun removeSongFromPlaylist(playlistId: Long, songId: Long)
 
+    suspend fun getSongsByArtist(artistName: String): List<Song>
+
 }

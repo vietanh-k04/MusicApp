@@ -16,9 +16,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.musicapp.R
 import com.example.musicapp.ui.viewmodel.LibraryViewModel
 
 
@@ -36,7 +38,7 @@ fun PlaylistScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Playlist của tôi") },
+                title = { Text(stringResource(R.string.playlist_hint)) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) } }
             )
         },
@@ -48,7 +50,7 @@ fun PlaylistScreen(
     ) { padding ->
         if (playlists.isEmpty()) {
             Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Chưa có Playlist nào. Hãy tạo mới!", color = Color.Gray)
+                Text(stringResource(R.string.playlist_announcement), color = Color.Gray)
             }
         } else {
             LazyColumn(contentPadding = padding) {
@@ -75,16 +77,15 @@ fun PlaylistScreen(
             }
         }
 
-        // Dialog tạo Playlist
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text("Tạo Playlist mới") },
+                title = { Text(stringResource(R.string.playlist_create)) },
                 text = {
                     OutlinedTextField(
                         value = newPlaylistName,
                         onValueChange = { newPlaylistName = it },
-                        label = { Text("Tên Playlist") },
+                        label = { Text(stringResource(R.string.playlist_name)) },
                         singleLine = true
                     )
                 },
@@ -95,10 +96,10 @@ fun PlaylistScreen(
                             newPlaylistName = ""
                             showDialog = false
                         }
-                    }) { Text("Tạo") }
+                    }) { Text(stringResource(R.string.playlist_submit)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDialog = false }) { Text("Hủy") }
+                    TextButton(onClick = { showDialog = false }) { stringResource(R.string.playlist_dismiss) }
                 }
             )
         }

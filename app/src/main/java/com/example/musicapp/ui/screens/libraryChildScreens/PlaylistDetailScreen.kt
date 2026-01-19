@@ -15,7 +15,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.musicapp.R
 import com.example.musicapp.ui.components.SongItem
 import com.example.musicapp.ui.viewmodel.LibraryViewModel
 import com.example.musicapp.ui.viewmodel.SharedViewModel
@@ -33,7 +35,7 @@ fun PlaylistDetailScreen(
     SimpleListScreen(title = playlistName, onBack = onBack) {
         if (songs.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Playlist trống", color = Color.Gray)
+                Text(stringResource(R.string.playlist_empty), color = Color.Gray)
             }
         } else {
             LazyColumn {

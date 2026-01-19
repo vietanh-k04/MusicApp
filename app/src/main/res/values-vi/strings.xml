@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Nghe Nhạc</string>
 
     <string name="nav_library">Thư viện</string>
     <string name="nav_discovery">Khám phá</string>
@@ -41,5 +40,20 @@
     <string name="error_sugges">Không tải được gợi ý</string>
     <string name="more_dev">Phát triển bởi: Việt Anh</string>
     <string name="more_reserved">© 2026 Đã đăng ký bản quyền</string>
+    <string name="playlist_hint">Playlist của tôi</string>
+    <string name="playlist_announcement">Chưa có Playlist nào. Hãy tạo mới!</string>
+    <string name="playlist_create">Tạo Playlist mới</string>
+    <string name="playlist_name">Tên Playlist</string>
+    <string name="playlist_submit">Tạo</string>
+    <string name="playlist_dismiss">Hủy</string>
+    <string name="playlist_empty">Playlist trống</string>
+    <string name="favor_hint">Bài hát yêu thích</string>
+    <string name="favor_empty">Chưa có bài hát yêu thích nào</string>
+    <string name="recent_hint">Nghe gần đây</string>
+    <string name="recent_empty">Chưa nghe bài hát nào</string>
+    <string name="albumn_hint">Tuyển tập</string>
+    <string name="albumn_load">Đang tải ...</string>
+    <string name="albumn_empty">Không tìm thấy Album nào</string>
+    <string name="albumn_songs">bài hát</string>
 
 </resources>

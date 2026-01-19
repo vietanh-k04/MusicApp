@@ -46,15 +46,15 @@ fun ChartScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF8E2DE2), // Tím
-                            Color(0xFF4A00E0)  // Xanh tím
+                            Color(0xFF8E2DE2),
+                            Color(0xFF4A00E0)
                         )
                     )
                 ),
             contentAlignment = Alignment.CenterStart
         ) {
             Text(
-                text = "#BXH Top Hits",
+                text = stringResource(R.string.tops_hint),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -62,7 +62,6 @@ fun ChartScreen(
             )
         }
 
-        // 2. THANH CHỌN LOẠI BXH (Filter Chips)
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()

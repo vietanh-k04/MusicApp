@@ -72,44 +72,27 @@ class LocalMusicSource @Inject constructor(@ApplicationContext private val conte
     }
 
     fun getLocalAlbums(): List<Album> {
-        val albums = mutableListOf<Album>()
-        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaStore.Audio.Albums.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        } else {
-            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
+        val allSongs = getAllSongs()
+        val groupedByArtist = allSongs.groupBy { it.artist ?: "Unknown Artist" }
+
+        val virtualAlbums = groupedByArtist.map { (artistName, songs) ->
+            val representativeArt = songs.firstOrNull()?.albumArtUri ?: ""
+            val fakeId = artistName.hashCode().toLong()
+
+            Album(
+                id = fakeId,
+                title = "Tuyển tập $artistName",
+                artist = artistName,
+                albumArtUri = representativeArt,
+                numberOfSongs = songs.size
+            )
         }
 
-        val projection = arrayOf(
-            MediaStore.Audio.Albums._ID,
-            MediaStore.Audio.Albums.ALBUM,
-            MediaStore.Audio.Albums.ARTIST,
-            MediaStore.Audio.Albums.NUMBER_OF_SONGS
-        )
+        return virtualAlbums.sortedBy { it.title }
+    }
 
-        try {
-            val cursor = context.contentResolver.query(
-                collection, projection, null, null, "${MediaStore.Audio.Albums.ALBUM} ASC"
-            )
-
-            cursor?.use {
-                val idCol = it.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
-                val nameCol = it.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)
-                val artistCol = it.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)
-                val countCol = it.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS)
-
-                while (it.moveToNext()) {
-                    val id = it.getLong(idCol)
-                    val name = it.getString(nameCol) ?: "Unknown Album"
-                    val artist = it.getString(artistCol) ?: "Unknown Artist"
-                    val count = it.getInt(countCol)
-
-                    val sArtworkUri = "content://media/external/audio/albumart".toUri()
-                    val albumArtUri = ContentUris.withAppendedId(sArtworkUri, id).toString()
-
-                    albums.add(Album(id, name, artist, albumArtUri, count))
-                }
-            }
-        } catch (e: Exception) { e.printStackTrace() }
-        return albums
+    fun getSongsByArtist(artistName: String): List<Song> {
+        val allSongs = getAllSongs()
+        return allSongs.filter { (it.artist ?: "Unknown Artist") == artistName }
     }
 }

@@ -8,7 +8,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.musicapp.R
 import com.example.musicapp.domain.model.Song
 import com.example.musicapp.ui.components.SongItem
 import com.example.musicapp.ui.viewmodel.LibraryViewModel
@@ -22,17 +24,16 @@ fun FavoriteScreen(
 ) {
     val favorites by viewModel.favoriteSongs.collectAsState()
 
-    SimpleListScreen(title = "Bài hát yêu thích", onBack = onBack) {
+    SimpleListScreen(title = stringResource(R.string.favor_hint), onBack = onBack) {
         if (favorites.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Chưa có bài hát yêu thích nào", color = Color.Gray)
+                Text(stringResource(R.string.favor_empty), color = Color.Gray)
             }
         } else {
             LazyColumn {
                 items(favorites) { entity ->
                     val song = Song(entity.id, entity.title, entity.artist, entity.contentUri, entity.albumArtUri)
                     SongItem(song = song, onClick = {
-                        // Phát nhạc: Chuyển toàn bộ list favorite thành playlist
                         val playlist = favorites.map { Song(it.id, it.title, it.artist, it.contentUri, it.albumArtUri) }
                         sharedViewModel.playMusic(song, playlist)
                     })

@@ -43,6 +43,9 @@ class LibraryViewModel @Inject constructor(private val repository: MusicReposito
     val playlists = repository.getAllPlaylists()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    private val _artistSongs = MutableStateFlow<List<Song>>(emptyList())
+    val artistSongs = _artistSongs.asStateFlow()
+
     init {
         loadLocalData()
     }
@@ -87,6 +90,12 @@ class LibraryViewModel @Inject constructor(private val repository: MusicReposito
     fun addSongToPlaylist(playlistId: Long, song: Song) {
         viewModelScope.launch {
             repository.addSongToPlaylist(playlistId, song)
+        }
+    }
+
+    fun loadSongsByArtist(artistName: String) {
+        viewModelScope.launch {
+            _artistSongs.value = repository.getSongsByArtist(artistName)
         }
     }
 }

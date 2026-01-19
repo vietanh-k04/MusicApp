@@ -107,4 +107,6 @@ class MusicRepositoryImpl @Inject constructor(private val localMusicSource: Loca
     override suspend fun removeSongFromPlaylist(playlistId: Long, songId: Long) {
         musicDao.removeSongFromPlaylist(playlistId, songId)
     }
+
+    override suspend fun getSongsByArtist(artistName: String): List<Song> = localMusicSource.getSongsByArtist(artistName)
 }

@@ -21,4 +21,8 @@ sealed class Screen(val route: String, @StringRes val title: Int, val icon: Imag
     object PlaylistDetail : Screen("playlist_detail/{id}/{name}", R.string.lib_playlist, Icons.AutoMirrored.Filled.List) {
         fun createRoute(id: Long, name: String) = "playlist_detail/$id/$name"
     }
+
+    object AlbumDetail : Screen("album_detail/{name}", R.string.lib_album, Icons.Default.Album) {
+        fun createRoute(name: String) = "album_detail/$name"
+    }
 }

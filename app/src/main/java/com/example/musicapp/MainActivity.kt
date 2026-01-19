@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.musicapp.ui.MainScreen
 import com.example.musicapp.ui.player.PlayerScreen
 import com.example.musicapp.ui.theme.MusicAppTheme
+import com.example.musicapp.ui.viewmodel.SettingsViewModel
 import com.example.musicapp.ui.viewmodel.SharedViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,13 +23,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // 1. Khởi tạo ViewModel sớm để lấy config Theme
             val sharedViewModel: SharedViewModel = hiltViewModel()
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
 
-            // 2. Lắng nghe trạng thái Theme
-            val isDarkTheme by sharedViewModel.isDarkTheme.collectAsState()
+            val isDarkTheme by settingsViewModel.isDarkTheme.collectAsState()
 
-            // 3. Truyền trạng thái vào MusicAppTheme
             MusicAppTheme(darkTheme = isDarkTheme) {
 
                 val rootNavController = rememberNavController()
@@ -42,7 +41,8 @@ class MainActivity : AppCompatActivity() {
                             sharedViewModel = sharedViewModel,
                             onFullScreenPlayerRequest = {
                                 rootNavController.navigate("player")
-                            }
+                            },
+                            settingsViewModel = settingsViewModel
                         )
                     }
 

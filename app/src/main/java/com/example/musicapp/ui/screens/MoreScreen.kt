@@ -26,13 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.musicapp.ui.viewmodel.SharedViewModel
 import com.example.musicapp.R
+import com.example.musicapp.ui.viewmodel.SettingsViewModel
 import com.example.musicapp.utils.formatDuration
 
 @Composable
-fun MoreScreen(sharedViewModel: SharedViewModel) {
+fun MoreScreen(sharedViewModel: SharedViewModel, settingsViewModel: SettingsViewModel) {
     val remainingTime by sharedViewModel.remainingTime.collectAsState()
 
-    val isDarkTheme by sharedViewModel.isDarkTheme.collectAsState()
+    val isDarkTheme by settingsViewModel.isDarkTheme.collectAsState()
 
     var showTimerDialog by remember { mutableStateOf(false) }
     var showAboutDialog by remember { mutableStateOf(false) }
@@ -82,13 +83,13 @@ fun MoreScreen(sharedViewModel: SharedViewModel) {
             subtitle = stringResource(R.string.more_theme_desc),
             iconColor = Color(0xFF9C27B0),
             onClick = {
-                sharedViewModel.setDarkTheme(!isDarkTheme)
+                settingsViewModel.setDarkTheme(!isDarkTheme)
             },
             trailing = {
                 Switch(
                     checked = isDarkTheme,
                     onCheckedChange = { isChecked ->
-                        sharedViewModel.setDarkTheme(isChecked)
+                        settingsViewModel.setDarkTheme(isChecked)
                     }
                 )
             }
@@ -180,7 +181,7 @@ fun MoreScreen(sharedViewModel: SharedViewModel) {
                     // Chọn Tiếng Việt
                     TextButton(
                         onClick = {
-                            sharedViewModel.setLanguage("vi")
+                            settingsViewModel.setLanguage("vi")
                             showLangDialog = false
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -190,10 +191,9 @@ fun MoreScreen(sharedViewModel: SharedViewModel) {
 
                     HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
 
-                    // Chọn Tiếng Anh
                     TextButton(
                         onClick = {
-                            sharedViewModel.setLanguage("en")
+                            settingsViewModel.setLanguage("en")
                             showLangDialog = false
                         },
                         modifier = Modifier.fillMaxWidth()

@@ -36,7 +36,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SharedViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val dataStoreManager: DataStoreManager,
     private val repository: MusicRepository
 ) : ViewModel() {
 
@@ -67,12 +66,6 @@ class SharedViewModel @Inject constructor(
     private val _isFavorite = MutableStateFlow(false)
     val isFavorite = _isFavorite.asStateFlow()
 
-    val isDarkTheme = dataStoreManager.isDarkThemeFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
 
     init {
         val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
@@ -254,7 +247,7 @@ class SharedViewModel @Inject constructor(
                 ?: item.requestMetadata.mediaUri
                 ?: "".toUri()
 
-            _currentPlayingSong.value = Song(
+            val song = Song(
                 id = item.mediaId.toLongOrNull(),
                 title = item.mediaMetadata.title.toString(),
                 artist = item.mediaMetadata.artist.toString(),
@@ -262,7 +255,11 @@ class SharedViewModel @Inject constructor(
                 albumArtUri = item.mediaMetadata.artworkUri.toString()
             )
 
+            _currentPlayingSong.value = song
             if (controller.duration > 0) _duration.value = controller.duration
+            viewModelScope.launch {
+                repository.addToHistory(song)
+            }
         }
     }
 
@@ -305,18 +302,18 @@ class SharedViewModel @Inject constructor(
         mediaController?.release()
     }
 
-    fun setDarkTheme(isDark: Boolean) { viewModelScope.launch { dataStoreManager.saveTheme(isDark) } }
-
-    fun setLanguage(code: String) {
-        val localeList = LocaleListCompat.forLanguageTags(code)
-        AppCompatDelegate.setApplicationLocales(localeList)
-    }
-
     fun toggleFavorite() {
         val song = currentPlayingSong.value ?: return
         viewModelScope.launch {
             if (_isFavorite.value) repository.removeFavorite(song.id ?: -1)
             else repository.insertFavorite(song)
         }
+    }
+
+    fun stopMusic() {
+        mediaController?.pause()
+        _isPlaying.value = false
+        _currentPlayingSong.value = null
+        _currentPosition.value = 0L
     }
 }
