@@ -68,17 +68,12 @@ com.example.musicapp
 │   │   ├── api                         
 │   │   └── dto                        
 │   └── repository                     
-│
 ├── di                                  
-│
 ├── domain                             
 │   ├── model                          
 │   └── repository                     
-│
 ├── receiver                            
-│
 ├── service                             
-│
 ├── ui                                  
 │   ├── components                                 
 │   ├── navigation                     
@@ -86,9 +81,7 @@ com.example.musicapp
 │   ├── screens                         
 │   ├── theme                           
 │   └── viewmodel                       
-│
 ├── utils                               
-│
 ├── MainActivity.kt                     
 └── MySoundApplication.kt               
 
