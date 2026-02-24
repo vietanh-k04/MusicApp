@@ -11,7 +11,7 @@
 * **Local Storage:** Room Database, Preferences DataStore
 * **Dependency Injection:** Hilt
 
-✨ Chức năng & Hướng xử lý kỹ thuật
+✨ Chức năng
 * **Trình phát nhạc:** Phát nền liền mạch, tự động chuyển bài, hỗ trợ MiniPlayer vuốt để tắt và điều khiển qua màn hình khóa
 * **Quản lý nhạc trong thiết bị:** Quét, hiển thị file MP3 có sẵn và tự động gom nhóm thành Album theo tên nghệ sĩ
 * **Khám phá nhạc trực tuyến:** Tìm kiếm bài hát toàn cầu, hiển thị bảng xếp hạng (Charts) theo thể loại
