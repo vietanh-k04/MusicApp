@@ -10,7 +10,7 @@ Một ứng dụng nghe nhạc trực tuyến và offline đầy đủ tính nă
 ## 📱 Ảnh chụp màn hình (Screenshots)
 
 <p align="center">
-  <img src="screenshot/offilne.jpg" width="200" alt="Offline Screen"/>
+  <img src="screenshot/offline.jpg" width="200" alt="Offline Screen"/>
   <img src="screenshot/online.jpg" width="200" alt="Online Screen"/>
   <img src="screenshot/top.jpg" width="200" alt="Top Hilt Screen"/>
   <img src="screenshot/setting_1.jpg" width="200" alt="Settting Screen"/>
