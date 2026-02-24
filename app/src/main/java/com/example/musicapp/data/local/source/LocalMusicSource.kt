@@ -14,7 +14,6 @@ class LocalMusicSource @Inject constructor(@ApplicationContext private val conte
     fun getAllSongs(): List<Song> {
         val songs = mutableListOf<Song>()
 
-        // 1. Chọn nơi quét
         val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         } else {
@@ -29,7 +28,6 @@ class LocalMusicSource @Inject constructor(@ApplicationContext private val conte
             MediaStore.Audio.Media.DURATION
         )
 
-        // Ý nghĩa: Chỉ lấy file được đánh dấu là nhạc VÀ dài hơn 30 giây
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0 AND ${MediaStore.Audio.Media.DURATION} >= ?"
         val selectionArgs = arrayOf("30000")
 
@@ -54,7 +52,6 @@ class LocalMusicSource @Inject constructor(@ApplicationContext private val conte
                     val artist = it.getString(artistCol) ?: "Unknown Artist"
                     val albumId = it.getLong(albumIdCol)
 
-                    // Xử lý tên tác giả nếu bị lỗi <unknown>
                     val finalArtist = if (artist == "<unknown>") "Unknown Artist" else artist
 
                     val contentUri = ContentUris.withAppendedId(collection, id)

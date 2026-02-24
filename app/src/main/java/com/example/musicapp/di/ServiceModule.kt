@@ -18,8 +18,8 @@ object ServiceModule {
     @Provides
     @Singleton
     fun provideAudioAttributes(): AudioAttributes = AudioAttributes.Builder()
-        .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC) // Loại nội dung: Nhạc
-        .setUsage(C.USAGE_MEDIA) // Mục đích: Giải trí
+        .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+        .setUsage(C.USAGE_MEDIA)
         .build()
 
     @Provides
@@ -28,7 +28,7 @@ object ServiceModule {
         @ApplicationContext context: Context,
         audioAttributes: AudioAttributes
     ): ExoPlayer = ExoPlayer.Builder(context)
-        .setAudioAttributes(audioAttributes, true) // Tự động nhỏ nhạc khi có thông báo
-        .setHandleAudioBecomingNoisy(true) // Tự dừng khi rút tai nghe
+        .setAudioAttributes(audioAttributes, true)
+        .setHandleAudioBecomingNoisy(true)
         .build()
 }

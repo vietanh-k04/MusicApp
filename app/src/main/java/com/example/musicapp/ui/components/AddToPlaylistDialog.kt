@@ -29,7 +29,7 @@ fun AddToPlaylistDialog(
                 Text("Bạn chưa có Playlist nào. Hãy tạo mới!")
             } else {
                 LazyColumn(
-                    modifier = Modifier.heightIn(max = 300.dp) // Giới hạn chiều cao
+                    modifier = Modifier.heightIn(max = 300.dp)
                 ) {
                     items(playlists) { playlist ->
                         Row(

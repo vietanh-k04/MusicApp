@@ -24,7 +24,6 @@ class ChartViewModel @Inject constructor(private val repository: MusicRepository
     private val _uiState = MutableStateFlow<ChartUiState>(ChartUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    // Danh sách các loại BXH
     val categories = listOf(
         ChartCategory("V-Pop", "Top Hits Vietnam"),
         ChartCategory("US-UK", "Top Hits US UK"),
@@ -33,12 +32,10 @@ class ChartViewModel @Inject constructor(private val repository: MusicRepository
         ChartCategory("Indie", "Indie Vietnam")
     )
 
-    // Lưu trạng thái đang chọn loại nào (Mặc định là cái đầu tiên)
     private val _selectedCategory = MutableStateFlow(categories[0])
     val selectedCategory = _selectedCategory.asStateFlow()
 
     init {
-        // Load cái đầu tiên khi mở màn hình
         loadChartData(categories[0])
     }
 

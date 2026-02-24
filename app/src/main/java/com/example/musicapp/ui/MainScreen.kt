@@ -93,7 +93,6 @@ fun MainScreen(
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             NavHost(navController = navController, startDestination = Screen.Library.route) {
 
-                // Tab 1: Thư viện
                 composable(Screen.Library.route) {
                     LibraryScreen(sharedViewModel = sharedViewModel, onNavigateTo = { route -> navController.navigate(route) })
                 }

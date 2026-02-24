@@ -24,13 +24,12 @@ import com.example.musicapp.domain.model.Song
 @Composable
 fun ChartSongItem(song: Song, rank: Int, onClick: () -> Unit) {
     val rankColor = when (rank) {
-        1 -> Color(0xFF4A90E2) // Xanh dương
-        2 -> Color(0xFF50E3C2) // Xanh ngọc
-        3 -> Color(0xFFE35050) // Đỏ
-        else -> Color.Gray      // Xám
+        1 -> Color(0xFF4A90E2)
+        2 -> Color(0xFF50E3C2)
+        3 -> Color(0xFFE35050)
+        else -> Color.Gray
     }
 
-    // Font to cho Top 3
     val rankSize = if (rank <= 3) 24.sp else 18.sp
     val rankWeight = if (rank <= 3) FontWeight.Bold else FontWeight.Normal
 
@@ -50,7 +49,6 @@ fun ChartSongItem(song: Song, rank: Int, onClick: () -> Unit) {
             textAlign = TextAlign.Center
         )
 
-        // 2. ẢNH BÌA
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(song.albumArtUri)
@@ -65,7 +63,6 @@ fun ChartSongItem(song: Song, rank: Int, onClick: () -> Unit) {
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 3. THÔNG TIN BÀI HÁT
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = song.title ?: "Unknown",

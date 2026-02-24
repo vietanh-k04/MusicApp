@@ -21,7 +21,6 @@ class HeadsetReceiver(private val player: ExoPlayer) : BroadcastReceiver() {
             }
         }
 
-        // Sự kiện phụ: Khi âm thanh bị ồn (ví dụ rút dây loa) - Hệ thống Android bắn cái này
         if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
             if (player.isPlaying) {
                 player.pause()

@@ -46,7 +46,6 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
     val repeatMode by viewModel.repeatMode.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
 
-    // Logic Animation xoay ảnh đĩa nhạc
     val infiniteTransition = rememberInfiniteTransition(label = "rotate")
     val angle by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -56,10 +55,8 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
         ),
         label = "rotation"
     )
-    // Nếu đang phát thì xoay, dừng thì đứng im (hoặc về 0)
     val rotationState = if (isPlaying) angle else 0f
 
-    // 3. Nếu không có bài hát nào, quay về
     if (currentSong == null) {
         onBack()
         return
@@ -168,7 +165,6 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Shuffle
             IconButton(onClick = { viewModel.toggleShuffle() }) {
                 Icon(
                     imageVector = Icons.Default.Shuffle,
@@ -178,12 +174,10 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
                 )
             }
 
-            // 2. Previous
             IconButton(onClick = { viewModel.skipToPrevious() }, modifier = Modifier.size(48.dp)) {
                 Icon(Icons.Default.SkipPrevious, contentDescription = "Prev", tint = Color.White, modifier = Modifier.size(40.dp))
             }
 
-            // 3. Play/Pause
             IconButton(
                 onClick = { viewModel.toggleMusic() },
                 modifier = Modifier
@@ -198,12 +192,10 @@ fun PlayerScreen(onBack: () -> Unit, viewModel: SharedViewModel) {
                 )
             }
 
-            // 4. Next
             IconButton(onClick = { viewModel.skipToNext() }, modifier = Modifier.size(48.dp)) {
                 Icon(Icons.Default.SkipNext, contentDescription = "Next", tint = Color.White, modifier = Modifier.size(40.dp))
             }
 
-            // 5. Repeat
             IconButton(onClick = { viewModel.toggleRepeat() }) {
                 val icon = if (repeatMode == Player.REPEAT_MODE_ONE) Icons.Default.RepeatOne else Icons.Default.Repeat
                 val tint = if (repeatMode == Player.REPEAT_MODE_OFF) Color.Gray.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary

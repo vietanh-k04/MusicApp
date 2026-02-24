@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class) // Module này sống cùng vòng đời ứng dụng
+@InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Provides

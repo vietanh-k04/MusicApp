@@ -51,7 +51,6 @@ class DiscoveryViewModel @Inject constructor(private val repository: MusicReposi
     }
 
     fun loadRandomSuggestion() {
-        // Danh sách từ khóa để "random"
         val randomKeywords = listOf("V-Pop", "Indie Vietnam", "US-UK Top Hits", "K-Pop", "Chill", "Rap Việt")
         val randomKey = randomKeywords.random()
 

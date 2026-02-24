@@ -48,10 +48,9 @@ fun MiniPlayer(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp), // Padding tổng thể
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. ẢNH BÌA (Bên trái) - Zing Style: Bo tròn
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(song.albumArtUri)
@@ -66,7 +65,6 @@ fun MiniPlayer(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // 2. THÔNG TIN BÀI HÁT (Ở giữa)
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
@@ -88,7 +86,6 @@ fun MiniPlayer(
                 )
             }
 
-            // Nút Prev
             IconButton(onClick = onPrev, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.Default.SkipPrevious,
@@ -97,7 +94,6 @@ fun MiniPlayer(
                 )
             }
 
-            // Nút Play/Pause
             IconButton(onClick = onTogglePlay, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -106,7 +102,6 @@ fun MiniPlayer(
                 )
             }
 
-            // Nút Next
             IconButton(onClick = onNext, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.Default.SkipNext,
@@ -116,7 +111,6 @@ fun MiniPlayer(
             }
         }
 
-        // 4. THANH TIẾN TRÌNH (Sát đáy)
         LinearProgressIndicator(
         progress = { progress },
         modifier = Modifier

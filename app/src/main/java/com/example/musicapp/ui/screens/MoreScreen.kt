@@ -45,7 +45,6 @@ fun MoreScreen(sharedViewModel: SharedViewModel, settingsViewModel: SettingsView
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // 1. HEADER
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,7 +75,6 @@ fun MoreScreen(sharedViewModel: SharedViewModel, settingsViewModel: SettingsView
             onClick = { showTimerDialog = true }
         )
 
-        // Giao diện
         SettingItem(
             icon = Icons.Default.DarkMode,
             title = stringResource(R.string.more_theme),
@@ -103,7 +101,6 @@ fun MoreScreen(sharedViewModel: SharedViewModel, settingsViewModel: SettingsView
             onClick = { showLangDialog = true }
         )
 
-        // Thông tin
         SettingItem(
             icon = Icons.Default.Info,
             title = stringResource(R.string.more_info),
@@ -113,7 +110,6 @@ fun MoreScreen(sharedViewModel: SharedViewModel, settingsViewModel: SettingsView
         )
     }
 
-    // Dialog Hẹn giờ
     if (showTimerDialog) {
         AlertDialog(
             onDismissRequest = { showTimerDialog = false },
@@ -149,7 +145,6 @@ fun MoreScreen(sharedViewModel: SharedViewModel, settingsViewModel: SettingsView
         )
     }
 
-    // Dialog Thông tin
     if (showAboutDialog) {
         AlertDialog(
             onDismissRequest = { showAboutDialog = false },
@@ -178,7 +173,6 @@ fun MoreScreen(sharedViewModel: SharedViewModel, settingsViewModel: SettingsView
             title = { Text(stringResource(R.string.more_lang)) },
             text = {
                 Column {
-                    // Chọn Tiếng Việt
                     TextButton(
                         onClick = {
                             settingsViewModel.setLanguage("vi")

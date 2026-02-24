@@ -32,14 +32,13 @@ class MusicRepositoryImpl @Inject constructor(private val localMusicSource: Loca
             val response = apiService.searchSongs(query = query)
 
             if (response.isSuccessful && response.body() != null) {
-                // Mapping: Biến đổi dữ liệu từ API thành Song của app
                 response.body()!!.results.map { dto ->
                     Song(
-                        id = dto.musicUrl.hashCode().toLong(), // Tạm dùng hashcode làm ID
+                        id = dto.musicUrl.hashCode().toLong(),
                         title = dto.title ?: "Unknown",
                         artist = dto.artist ?: "Unknown",
-                        contentUri = dto.musicUrl ?: "", // Link nhạc online (preview 30s)
-                        albumArtUri = dto.coverUrl ?: "" // Link ảnh bìa
+                        contentUri = dto.musicUrl ?: "",
+                        albumArtUri = dto.coverUrl ?: ""
                     )
                 }
             } else {

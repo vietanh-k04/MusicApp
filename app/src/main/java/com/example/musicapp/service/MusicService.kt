@@ -24,16 +24,13 @@ class MusicService : MediaSessionService() {
         super.onCreate()
         mediaSession = MediaSession.Builder(this, player).build()
 
-        // 1. Khởi tạo Receiver
         headsetReceiver = HeadsetReceiver(player)
 
-        // 2. Tạo bộ lọc (Chỉ nghe 2 sự kiện: Cắm rút tai nghe & Bị ồn)
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_HEADSET_PLUG)
             addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         }
 
-        // 3. Đăng ký với hệ thống
         registerReceiver(headsetReceiver, filter)
     }
 
