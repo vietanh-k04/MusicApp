@@ -10,10 +10,19 @@ Một ứng dụng nghe nhạc trực tuyến và offline đầy đủ tính nă
 ## 📱 Ảnh chụp màn hình (Screenshots)
 
 <p align="center">
-  <img src="path/to/screenshot1.png" width="200" alt="Home Screen"/>
-  <img src="path/to/screenshot2.png" width="200" alt="Player Screen"/>
-  <img src="path/to/screenshot3.png" width="200" alt="Library Screen"/>
-  <img src="path/to/screenshot4.png" width="200" alt="Dark Mode"/>
+  <img src="screenshot/offilne.jpg" width="200" alt="Offline Screen"/>
+  <img src="screenshot/online.jpg" width="200" alt="Online Screen"/>
+  <img src="screenshot/top.jpg" width="200" alt="Top Hilt Screen"/>
+  <img src="screenshot/setting_1.jpg" width="200" alt="Settting Screen"/>
+  <img src="screenshot/setting_2.jpg" width="200" alt="Dark Mode"/>
+  <img src="screenshot/setting_3.jpg" width="200" alt="Language"/>
+  <img src="screenshot/music.jpg" width="200" alt="Music Screen"/>
+  <img src="screenshot/playlist_1.jpg" width="200" alt="Add Music To The Playlist"/>
+  <img src="screenshot/playlist_3.jpg" width="200" alt="List Playlist"/>
+  <img src="screenshot/playlist_2.jpg" width="200" alt="List Of Songs In The Playlist"/>
+  <img src="screenshot/favorite.jpg" width="200" alt="Favorite Screen"/>
+  <img src="screenshot/albumn.jpg" width="200" alt="Albumn Screen"/>
+  <img src="screenshot/recent.jpg" width="200" alt="Recent Screen"/>
 </p>
 
 ## ✨ Tính năng nổi bật
