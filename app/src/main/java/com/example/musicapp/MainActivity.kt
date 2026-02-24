@@ -1,12 +1,17 @@
 package com.example.musicapp
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,41 +33,62 @@ class MainActivity : AppCompatActivity() {
 
             val isDarkTheme by settingsViewModel.isDarkTheme.collectAsState()
 
-            MusicAppTheme(darkTheme = isDarkTheme) {
+            val permissionToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_AUDIO
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
 
-                val rootNavController = rememberNavController()
+            var hasCheckedPermission by remember { mutableStateOf(false) }
 
-                NavHost(
-                    navController = rootNavController,
-                    startDestination = "main"
+            val permissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                hasCheckedPermission = true
+            }
+
+            LaunchedEffect(Unit) {
+                if (ContextCompat.checkSelfPermission(
+                        this@MainActivity,
+                        permissionToRequest
+                    ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    composable("main") {
-                        MainScreen(
-                            sharedViewModel = sharedViewModel,
-                            onFullScreenPlayerRequest = {
-                                rootNavController.navigate("player")
-                            },
-                            settingsViewModel = settingsViewModel
-                        )
-                    }
+                    hasCheckedPermission = true
+                } else {
+                    permissionLauncher.launch(permissionToRequest)
+                }
+            }
 
-                    composable(
-                        route = "player",
-                        enterTransition = {
-                            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up, tween(400))
-                        },
-                        exitTransition = {
-                            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400))
-                        },
-                        popEnterTransition = { null },
-                        popExitTransition = {
-                            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400))
-                        }
+            MusicAppTheme(darkTheme = isDarkTheme) {
+                if (hasCheckedPermission) {
+                    val rootNavController = rememberNavController()
+
+                    NavHost(
+                        navController = rootNavController,
+                        startDestination = "main"
                     ) {
-                        PlayerScreen(
-                            onBack = { rootNavController.popBackStack() },
-                            viewModel = sharedViewModel
-                        )
+                        composable("main") {
+                            MainScreen(
+                                sharedViewModel = sharedViewModel,
+                                onFullScreenPlayerRequest = {
+                                    rootNavController.navigate("player")
+                                },
+                                settingsViewModel = settingsViewModel
+                            )
+                        }
+
+                        composable(
+                            route = "player",
+                            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up, tween(400)) },
+                            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400)) },
+                            popEnterTransition = { null },
+                            popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400)) }
+                        ) {
+                            PlayerScreen(
+                                onBack = { rootNavController.popBackStack() },
+                                viewModel = sharedViewModel
+                            )
+                        }
                     }
                 }
             }

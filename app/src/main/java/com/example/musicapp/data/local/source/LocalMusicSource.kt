@@ -4,6 +4,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import com.example.musicapp.domain.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -28,8 +29,8 @@ class LocalMusicSource @Inject constructor(@ApplicationContext private val conte
             MediaStore.Audio.Media.DURATION
         )
 
-        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0 AND ${MediaStore.Audio.Media.DURATION} >= ?"
-        val selectionArgs = arrayOf("30000")
+        val selection: String? = null
+        val selectionArgs: Array<String>? = null
 
         try {
             val cursor = context.contentResolver.query(
@@ -39,6 +40,8 @@ class LocalMusicSource @Inject constructor(@ApplicationContext private val conte
                 selectionArgs,
                 "${MediaStore.Audio.Media.TITLE} ASC"
             )
+
+            Log.d("MusicAppDebug", "Số lượng bài hát tìm thấy trong MediaStore: ${cursor?.count ?: 0}")
 
             cursor?.use {
                 val idCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
