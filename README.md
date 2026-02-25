@@ -29,9 +29,10 @@
   <img src="screenshot/setting_3.jpg" width="200" alt="Language"/>
   <img src="screenshot/music.jpg" width="200" alt="Music Screen"/>
   <img src="screenshot/playlist_1.jpg" width="200" alt="Add Music To The Playlist"/>
-  <img src="screenshot/playlist_3.jpg" width="200" alt="List Playlist"/>
-  <img src="screenshot/playlist_2.jpg" width="200" alt="List Of Songs In The Playlist"/>
+  <img src="screenshot/playlist_2.jpg" width="200" alt="List Playlist"/>
+  <img src="screenshot/playlist_3.jpg" width="200" alt="List Of Songs In The Playlist"/>
   <img src="screenshot/favorite.jpg" width="200" alt="Favorite Screen"/>
-  <img src="screenshot/albumn.jpg" width="200" alt="Albumn Screen"/>
+  <img src="screenshot/albumn_1.jpg" width="200" alt="Albumn Screen"/>
+  <img src="screenshot/albumn_2.jpg" width="200" alt="Albumn Screen"/>
   <img src="screenshot/recent.jpg" width="200" alt="Recent Screen"/>
 </p>
